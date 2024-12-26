@@ -142,8 +142,6 @@ stock MySurvivorCompanion(client) {
 stock CheckGamemode() {
 	char TheGamemode[64];
 	GetConVarString(g_Gamemode, TheGamemode, sizeof(TheGamemode));
-	char TheRequiredGamemode[64];
-	GetConfigValue(TheRequiredGamemode, sizeof(TheRequiredGamemode), "gametype?");
 	LogMessage("Game mode is %s , required game mode is %s", TheGamemode, TheRequiredGamemode);
 
 	if (!StrEqual(TheRequiredGamemode, "-1") && !StrEqual(TheGamemode, TheRequiredGamemode, false)) {

@@ -475,6 +475,7 @@ stock LoadMainConfig() {
 	fAugmentActivatorRatingMultiplier	= GetConfigValueFloat("augment bonus activator rating multiplier?", 0.000005);
 	fAugmentTargetRatingMultiplier		= GetConfigValueFloat("augment bonus target rating multiplier?", 0.000005);
 	iRatingRequiredForAugmentLootDrops	= GetConfigValueInt("rating required for augment drops?", 30000);
+	iRatingBonusPerTalentPoint			= GetConfigValueInt("augment drop rating bonus per talent point?", 1000);
 	fAugmentTierChance					= GetConfigValueFloat("augment tier chance?", 0.75);
 	fAntiFarmDistance					= GetConfigValueFloat("anti farm kill distance?");
 	iAntiFarmMax						= GetConfigValueInt("anti farm kill max locations?");
@@ -557,7 +558,8 @@ stock LoadMainConfig() {
 	fSuperCommonVisualEffectCullRange	= GetConfigValueFloat("super common visuals cull range?", 2048.0);
 	iMaximumEnrageLeniency				= GetConfigValueInt("maximum survivors enrage leniency?", 10);
 	fEnragePeriodLeniency				= GetConfigValueFloat("enrage time to add per leniency?", 0.1);
-
+	
+	GetConfigValue(TheRequiredGamemode, sizeof(TheRequiredGamemode), "gametype?");
 	GetConfigValue(acmd, sizeof(acmd), "action slot command?");
 	GetConfigValue(abcmd, sizeof(abcmd), "abilitybar menu command?");
 	GetConfigValue(DefaultProfileName, sizeof(DefaultProfileName), "new player profile?");

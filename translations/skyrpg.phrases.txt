@@ -1478,7 +1478,11 @@
 	}
 	"server advertisement 3"
 	{
-		"en"	"{O}Join the steamgroup @ {B}https://steamcommunity.com/groups/sky-rpg/ {O}for permanent double experience."
+		"en"	"{O}Join the steamgroup @ {B}https://steamcommunity.com/groups/sky-rpg/ {O}for a permanent 5x XP bonus."
+	}
+	"server advertisement 4"
+	{
+		"en"	"{B}کkﻻrpg {O}is built on the open-source RPG Maker framework: {B}https://github.com/sky-rpg/"
 	}
 	"tellah"
 	{

@@ -1843,7 +1843,7 @@ stock void LoadedClientActions(int client) {
 	GiveMaximumHealth(client);
 	ChangeHook(client, true);
 	SurvivorStamina[client] = RoundToCeil((GetPlayerStamina(client) * 1.0) * fStartingStaminaPercentage);
-	PrintToChatAll("\x03%N's \x04data is \x03loaded.", client);
+	PrintToChat(client, "\x03Your \x04data is \x03loaded.");
 
 	bHasDonorPrivileges[client] = IsReserve(client);
 }

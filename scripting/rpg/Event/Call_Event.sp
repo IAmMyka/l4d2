@@ -170,7 +170,6 @@ public Call_Event(Handle event, char[] event_name, bool dontBroadcast, pos) {
 			attackerTeam = myCurrentTeam[attacker];
 			if (myCurrentTeam[attacker] == TEAM_SURVIVOR && !b_IsHooked[attacker]) {
 				LogMessage("Hooking %N", attacker);
-				PrintToChat(attacker, "\x04Locked 'n Loaded!");
 				ChangeHook(attacker, true);
 				ClearArray(ActiveStatuses[attacker]);
 				RefreshSurvivor(attacker);

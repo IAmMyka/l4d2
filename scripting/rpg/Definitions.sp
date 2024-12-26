@@ -17,7 +17,7 @@
 #define MAX_CHAT_LENGTH					1024
 #define COOPRECORD_DB					"db_season_coop"
 #define SURVRECORD_DB					"db_season_surv"
-#define PLUGIN_VERSION					"v4.6"
+#define PLUGIN_VERSION					"v4.6.2"
 #define PROFILE_VERSION					"v1.5"
 #define PLUGIN_CONTACT					"skyy"
 #define PLUGIN_NAME						"skyrpg"
@@ -538,6 +538,7 @@
 #define LOOTREASON_CLIENTSTOLELOOT 3
 #define LOOTREASON_CLIENTISOWNER 4
 
+char TheRequiredGamemode[64];
 int iMaximumEnrageLeniency;
 float fEnragePeriodLeniency;
 float fSuperCommonVisualEffectCullRange;
@@ -1461,6 +1462,7 @@ float fAugmentTargetRatingMultiplier;
 Handle equippedAugments[MAXPLAYERS + 1];
 Handle equippedAugmentsCategory[MAXPLAYERS + 1];
 int iRatingRequiredForAugmentLootDrops;
+int iRatingBonusPerTalentPoint;
 Handle GetAugmentTranslationKeys[MAXPLAYERS + 1];
 Handle GetAugmentTranslationVals[MAXPLAYERS + 1];
 float fAugmentTierChance;

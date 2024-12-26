@@ -159,8 +159,9 @@ public Action CMD_AutoDismantle(client, args) {
 	int lootFindBonus = 0;
 	if (GetArraySize(HandicapSelectedValues[client]) < 1) return Plugin_Handled;
 	if (handicapLevel[client] > 0) lootFindBonus = GetArrayCell(HandicapSelectedValues[client], 2);
+	int lootStrengthByTalentPoints = (iRatingBonusPerTalentPoint > 0) ? iRatingBonusPerTalentPoint * TotalPointsAssigned(client) : 0;
 	if (args < 1) {
-		PrintToChat(client, "\x04!autodismantle <score>\n\x03gear that roll under %d score will be auto-dismantled. \x04limit: \x03%d", iplayerSettingAutoDismantleScore[client], BestRating[client] + lootFindBonus);
+		PrintToChat(client, "\x04!autodismantle <score>\n\x03gear that rolls under Augment Score %d will be auto-dismantled. \x04limit: \x03%d", iplayerSettingAutoDismantleScore[client], (BestRating[client] + lootFindBonus + lootStrengthByTalentPoints) / iAugmentLevelDivisor);
 		PrintToChat(client, "\x04!autodismantle clear/perfect/major/minor - \x03Deletes \x04all/perfect/major/minor gear \x03not equipped or favourited.");
 		return Plugin_Handled;
 	}
@@ -282,9 +283,9 @@ public Action CMD_AutoDismantle(client, args) {
 	if (result > 0) BuildMenu(client);
 	if (result == 0) {
 		int auto = StringToInt(arg);
-		if (auto > 0 && auto <= BestRating[client] + lootFindBonus) {
+		if (auto > 0 && auto <= (BestRating[client] + lootFindBonus + lootStrengthByTalentPoints) / iAugmentLevelDivisor) {
 			iplayerSettingAutoDismantleScore[client] = auto;
-			PrintToChat(client, "\x04Dismantling gear that drops below \x03%d \x04score.", iplayerSettingAutoDismantleScore[client]);
+			PrintToChat(client, "\x04Dismantling gear that drops below Augment Score \x03%d", iplayerSettingAutoDismantleScore[client]);
 		}
 	}
 	return Plugin_Handled;

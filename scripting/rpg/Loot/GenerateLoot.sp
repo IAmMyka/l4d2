@@ -108,14 +108,18 @@ stock void CreateItemDrop(int owner, int client, int pos) {
 
 stock int GenerateAugment(int client, int spawnTarget) {
 	if (IsFakeClient(client)) return 0;
+	int lootStrengthByTalentPoints = (iRatingBonusPerTalentPoint > 0) ? iRatingBonusPerTalentPoint * TotalPointsAssigned(client) : 0;
 	int min = Rating[client];
-	int max = (min + iRatingRequiredForAugmentLootDrops > BestRating[client]) ? min + iRatingRequiredForAugmentLootDrops : BestRating[client];
+	int max = (min > BestRating[client]) ? min + 1 : BestRating[client];
+	min += lootStrengthByTalentPoints;
+	max += lootStrengthByTalentPoints;
 	int lootFindBonus = 0;
 	if (handicapLevel[client] > 0) {
 		lootFindBonus = GetArrayCell(HandicapSelectedValues[client], 2);
 	}
 	int potentialItemRating = GetRandomInt(min, max+lootFindBonus);
-	if (potentialItemRating < iplayerSettingAutoDismantleScore[client]) {
+	int trueDismantleScore = iplayerSettingAutoDismantleScore[client] * iAugmentLevelDivisor;
+	if (potentialItemRating < trueDismantleScore) {
 		// we give the player augment parts instead because they don't want this item.
 		return -2;
 	}

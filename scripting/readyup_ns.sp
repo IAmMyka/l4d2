@@ -768,12 +768,11 @@ stock bool IsBotVoteIgnored(bool breset = false) {
 stock bool IsMajorityCounter() {
 	if (i_IsMajority == 1) {
 		int num_Ready =	0;
-		int num_NotReady =	0;
+		int num_NotReady = 0;
 		for (int i = 1; i <= MaxClients; i++) {
-			if (IsClientInGame(i) && !IsFakeClient(i) && GetClientTeam(i) != TEAM_SPECTATOR) {
-				if (b_IsReady[i]) num_Ready++;
-				else num_NotReady++;
-			}
+			if (!IsClientInGame(i) || IsFakeClient(i) || GetClientTeam(i) == TEAM_SPECTATOR) continue;
+			if (b_IsReady[i]) num_Ready++;
+			else num_NotReady++;
 		}
 		if (num_Ready > num_NotReady) return true;
 	}
