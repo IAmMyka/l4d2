@@ -17,7 +17,7 @@
 #define MAX_CHAT_LENGTH					1024
 #define COOPRECORD_DB					"db_season_coop"
 #define SURVRECORD_DB					"db_season_surv"
-#define PLUGIN_VERSION					"v4.7.1"
+#define PLUGIN_VERSION					"v4.7.2"
 #define PROFILE_VERSION					"v1.5"
 #define PLUGIN_CONTACT					"skyy"
 #define PLUGIN_NAME						"skyrpg"

@@ -147,9 +147,7 @@ stock CheckGamemode() {
 	if (!StrEqual(TheRequiredGamemode, "-1") && !StrEqual(TheGamemode, TheRequiredGamemode, false)) {
 		LogMessage("Gamemode did not match, changing to %s", TheRequiredGamemode);
 		SetConVarString(g_Gamemode, TheRequiredGamemode);
-		char TheMapname[64];
-		GetCurrentMap(TheMapname, sizeof(TheMapname));
-		ServerCommand("changelevel %s", TheMapname);
+		ServerCommand("changelevel %s", TheCurrentMap);
 	}
 }
 

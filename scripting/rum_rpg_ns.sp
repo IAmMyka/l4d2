@@ -154,6 +154,8 @@ public void OnMapStart() {
 	ClearArray(StaggeredTargets);
 	UnhookAll();
 
+	GetCurrentMap(TheCurrentMap, sizeof(TheCurrentMap));
+
 	// The first time the plugin loads OnMapStart() will call before it has fully-loaded, resulting in the plugin not loading properly.
 	// This check is here because when the plugin fully-loads the first time, it will run this stuff.
 	if (bPluginHasLoaded) {
