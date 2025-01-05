@@ -1051,7 +1051,7 @@ public Action Timer_CheckIfHooked(Handle timer) {
 			bIsSettingsCheck = true;
 		}
 	}
-	if (RoundSeconds % HostNameTime == 0) {
+	if (RoundSeconds > 0 && RoundSeconds % HostNameTime == 0) {
 		char advertisement[512];
 		Format(advertisement, sizeof(advertisement), "server advertisement %d", iAdvertisementCounter+1);
 		Format(advertisement, sizeof(advertisement), "%t", advertisement);

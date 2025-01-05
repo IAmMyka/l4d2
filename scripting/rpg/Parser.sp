@@ -1,5 +1,7 @@
 public Action Timer_ExecuteConfig(Handle timer) {
 	if (ReadyUp_NtvConfigProcessing() == 0) {
+		LogMessage("====================================================");
+		LogMessage("...parsing RPG config files.");
 		// These are processed one-by-one in a defined-by-dependencies order, but you can place them here in any order you want.
 		// I've placed them here in the order they load for uniformality.
 		ReadyUp_ParseConfig(CONFIG_MAIN);
@@ -18,6 +20,22 @@ public Action Timer_ExecuteConfig(Handle timer) {
 		ReadyUp_ParseConfig(CONFIG_WEAPONS);
 		ReadyUp_ParseConfig(CONFIG_COMMONAFFIXES);
 		ReadyUp_ParseConfig(CONFIG_HANDICAP);
+		LogMessage("...RPG configs loaded.");
+
+		int modelprecacheSize = GetArraySize(ModelsToPrecache);
+		if (modelprecacheSize > 0) {
+			for (int i = 0; i < modelprecacheSize; i++) {
+				char modelName[64];
+				GetArrayString(ModelsToPrecache, i, modelName, 64);
+				if (IsModelPrecached(modelName)) continue;
+				PrecacheModel(modelName, true);
+			}
+		}
+		bPluginHasLoaded = true;
+		LogMessage("...skyrpg has loaded successfully.");
+		LogMessage("====================================================");
+		SetSurvivorsAliveHostname();
+		CheckGamemode();
 		//ReadyUp_ParseConfig(CONFIG_CLASSNAMES);
 		return Plugin_Stop;
 	}
@@ -42,6 +60,7 @@ public ReadyUp_LoadFromConfigEx(Handle key, Handle value, Handle section, char[]
 	char s_key[64];
 	char s_value[64];
 	char s_section[64];
+	LogMessage("...%s loaded.", configname);
 	if (StrEqual(configname, CONFIG_MAIN)) {
 		int a_Size						= GetArraySize(key);
 		for (int i = 0; i < a_Size; i++) {

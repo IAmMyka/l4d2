@@ -3246,6 +3246,11 @@
 		"#format"			"{1:s},{2:s},{3:s},{4:s},{5:s},{6:3.3f},{7:s},{8:s},{9:s}"
 		"en"				"{1}Your {2}Survival EXP Bonus {3}increases by {4}+{5}{6}{7}{8}"
 	}
+	"living survivors experience bonus (donator)"
+	{
+		"#format"			"{1:s},{2:s},{3:s},{4:s},{5:s},{6:3.3f},{7:s},{8:s},{9:s}"
+		"en"				"{1}Your {2}Survival EXP Bonus {3}increases by {4}+{5}{6}{7}{8} {9}(donator bonus)"
+	}
 	"team rating increase"
 	{
 		"#format"			"{1:s},{2:s},{3:s},{4:s},{5:s},{6:s},{7:s},{8:s},{9:s}"

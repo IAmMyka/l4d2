@@ -124,9 +124,15 @@ stock CallRoundIsOver() {
 						if (fExperienceBonus > 0.0) {
 							float scoreMult = GetScoreMultiplier(i);
 							if (scoreMult > 0.0) {
-								scoreMult = (scoreMult * fExperienceBonus);
+								scoreMult *= fExperienceBonus;
 								RoundExperienceMultiplier[i] += scoreMult;
 								PrintToChat(i, "%T", "living survivors experience bonus", i, orange, blue, orange, white, blue, scoreMult * 100.0, white, pct, orange);
+								if (bHasDonorPrivileges[i] && fDonatorSurvBonIncrease > 0.0) {
+									// donators receive a survival xp bonus to speed up their potential xp earnings.
+									scoreMult *= fDonatorSurvBonIncrease;
+									RoundExperienceMultiplier[i] += scoreMult;
+									PrintToChat(i, "%T", "living survivors experience bonus (donator)", i, orange, blue, orange, white, blue, scoreMult * 100.0, white, pct, orange);
+								}
 							}
 						}
 						//else PrintToChat(i, "no round bonus applied.");

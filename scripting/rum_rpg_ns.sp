@@ -19,7 +19,7 @@ public Plugin myinfo = {
 
 public void OnPluginStart() {
 	OnMapStartFunc(); // The very first thing that must happen before anything else happens.
-	CreateConVar("skyrpg_version", PLUGIN_VERSION, "!skyrpg   = )");
+	CreateConVar("skyrpg_version", PLUGIN_VERSION, "!skyrpg");
 	SetConVarString(FindConVar("skyrpg_version"), PLUGIN_VERSION);
 	g_Steamgroup = FindConVar("sv_steamgroup");
 	SetConVarFlags(g_Steamgroup, GetConVarFlags(g_Steamgroup) & ~FCVAR_NOTIFY);
@@ -137,15 +137,6 @@ public void OnMapStart() {
 	PrecacheModel("models/infected/witch_bride.mdl", true);
 	PrecacheModel("models/infected/witch.mdl", true);
 	PrecacheModel("models/props_interiors/toaster.mdl", true);
-	int modelprecacheSize = GetArraySize(ModelsToPrecache);
-	if (modelprecacheSize > 0) {
-		for (int i = 0; i < modelprecacheSize; i++) {
-			char modelName[64];
-			GetArrayString(ModelsToPrecache, i, modelName, 64);
-			if (IsModelPrecached(modelName)) continue;
-			PrecacheModel(modelName, true);
-		}
-	}
 	PrecacheSound(JETPACK_AUDIO, true); // we have jetpacks!!! hold jump!
 	g_iSprite = PrecacheModel("materials/sprites/laserbeam.vmt", true);
 	g_BeaconSprite = PrecacheModel("materials/sprites/halo01.vmt", true);
@@ -161,14 +152,24 @@ public void OnMapStart() {
 	ClearArray(EffectOverTime);
 	ClearArray(TimeOfEffectOverTime);
 	ClearArray(StaggeredTargets);
-	GetCurrentMap(TheCurrentMap, sizeof(TheCurrentMap));
-	Format(CONFIG_MAIN, sizeof(CONFIG_MAIN), "%srpg/%s.cfg", ConfigPathDirectory, TheCurrentMap);
-	if (!FileExists(CONFIG_MAIN)) Format(CONFIG_MAIN, sizeof(CONFIG_MAIN), "rpg/config.cfg");
-	else Format(CONFIG_MAIN, sizeof(CONFIG_MAIN), "rpg/%s.cfg", TheCurrentMap);
-
 	UnhookAll();
-	SetSurvivorsAliveHostname();
-	CheckGamemode();
+
+	// The first time the plugin loads OnMapStart() will call before it has fully-loaded, resulting in the plugin not loading properly.
+	// This check is here because when the plugin fully-loads the first time, it will run this stuff.
+	if (bPluginHasLoaded) {
+		int modelprecacheSize = GetArraySize(ModelsToPrecache);
+		if (modelprecacheSize > 0) {
+			for (int i = 0; i < modelprecacheSize; i++) {
+				char modelName[64];
+				GetArrayString(ModelsToPrecache, i, modelName, 64);
+				if (IsModelPrecached(modelName)) continue;
+				PrecacheModel(modelName, true);
+			}
+		}
+
+		SetSurvivorsAliveHostname();
+		CheckGamemode();
+	}
 }
 
 stock ResetValues(client) {
@@ -411,6 +412,7 @@ stock LoadMainConfig() {
 	FinSurvBon							= GetConfigValueFloat("finale survival bonus?");
 	fCoopSurvBon 						= GetConfigValueFloat("coop round survival bonus?");
 	fCoopSoloSurvBon					= GetConfigValueFloat("solo round survival bonus?");
+	fDonatorSurvBonIncrease				= GetConfigValueFloat("donator survival bonus increase?", 0.5);
 	iMaxIncap							= GetConfigValueInt("survivor max incap?");
 	iMaxLayers							= GetConfigValueInt("max talent layers?");
 	iCommonInfectedBaseDamage			= GetConfigValueInt("common infected base damage?");
@@ -568,7 +570,6 @@ stock LoadMainConfig() {
 	GetConfigValue(defaultLoadoutWeaponPrimary, sizeof(defaultLoadoutWeaponPrimary), "default loadout primary weapon?");
 	GetConfigValue(defaultLoadoutWeaponSecondary, sizeof(defaultLoadoutWeaponSecondary), "default loadout secondary weapon?");
 	GetConfigValue(serverKey, sizeof(serverKey), "server steam key?");
-	LogMessage("skyrpg has loaded successfully.");
 }
 #include "rpg/Array/CustomArray.sp"
 #include "rpg/Forwards.sp"

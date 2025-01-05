@@ -17,11 +17,12 @@
 #define MAX_CHAT_LENGTH					1024
 #define COOPRECORD_DB					"db_season_coop"
 #define SURVRECORD_DB					"db_season_surv"
-#define PLUGIN_VERSION					"v4.6.2"
+#define PLUGIN_VERSION					"v4.7.1"
 #define PROFILE_VERSION					"v1.5"
 #define PLUGIN_CONTACT					"skyy"
 #define PLUGIN_NAME						"skyrpg"
 #define PLUGIN_DESCRIPTION				"a build-your-own rpg adventure for source engine."
+#define CONFIG_MAIN						"rpg/config.cfg"
 #define CONFIG_EVENTS					"rpg/events.cfg"
 #define CONFIG_MAINMENU					"rpg/mainmenu.cfg"
 #define CONFIG_SURVIVORTALENTS			"rpg/talentmenu.cfg"
@@ -538,6 +539,7 @@
 #define LOOTREASON_CLIENTSTOLELOOT 3
 #define LOOTREASON_CLIENTISOWNER 4
 
+bool bPluginHasLoaded = false;
 char TheRequiredGamemode[64];
 int iMaximumEnrageLeniency;
 float fEnragePeriodLeniency;
@@ -956,7 +958,6 @@ bool b_MapStart = false;
 bool b_HardcoreMode[MAXPLAYERS + 1];
 int PreviousRoundIncaps[MAXPLAYERS + 1];
 int RoundIncaps[MAXPLAYERS + 1];
-char CONFIG_MAIN[64];
 bool b_IsCampaignComplete;
 bool b_IsRoundIsOver;
 bool b_IsCheckpointDoorStartOpened;
@@ -1009,7 +1010,7 @@ float f_OriginEnd[MAXPLAYERS + 1][3];
 int t_Distance[MAXPLAYERS + 1];
 int t_Healing[MAXPLAYERS + 1];
 bool b_IsActiveRound;
-bool b_IsFirstPluginLoad;
+bool b_IsFirstPluginLoad = false;
 char s_rup[32];
 Handle MainKeys;
 Handle MainValues;
@@ -1262,6 +1263,7 @@ float fCommonLevelHealthMult;
 int iServerLevelRequirement;
 float GroupMemberBonus;
 float FinSurvBon;
+float fDonatorSurvBonIncrease;
 int RaidLevMult;
 int iIgnoredRating;
 int iIgnoredRatingMax;
@@ -1606,6 +1608,7 @@ stock CreateAllArrays() {
 	}
 	CreateTimer(1.0, Timer_ExecuteConfig, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	b_FirstLoad = true;
+	LogMessage("=====\t\tmemory allocation complete\t\t=====");
 }
 
 stock BuildArraysOnClientFirstLoad(int client) {
