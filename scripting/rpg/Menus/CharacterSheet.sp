@@ -238,6 +238,13 @@ stock GetCharacterSheetData(client, char[] stringRef, theSize, request, zombiecl
 		fMultiplier = fWitchDamageScaleLevel;
 		iResult = iWitchDamageInitial + RoundToCeil(iWitchDamageInitial * (myCurrentDifficulty * fMultiplier));
 		baseDamage = iWitchDamageInitial;
+		if (attacker > 0) {
+			int pos		= FindListPositionByEntity(attacker, WitchList);
+			int witchConsecutiveHits = GetArrayCell(WitchList, pos, WITCH_CONSECUTIVE_HITS);
+			if (witchConsecutiveHits > 0) {
+				baseDamage += RoundToCeil((witchConsecutiveHits * fInfectedConsecutiveHitDamageUp) * baseDamage);
+			}
+		}
 	}
 	// only if a zombieclass has been specified.
 	if (zombieclass != 0) {
@@ -257,6 +264,7 @@ stock GetCharacterSheetData(client, char[] stringRef, theSize, request, zombiecl
 		iResult = iBaseSpecialDamage[zombieclass];
 		iResult += RoundToFloor(iResult * (myCurrentDifficulty * fMultiplier));
 		baseDamage = iBaseSpecialDamage[zombieclass];
+		if (IsLegitimateClient(attacker) && ConsecutiveHits[attacker] > 0) baseDamage += RoundToCeil((ConsecutiveHits[attacker] * fInfectedConsecutiveHitDamageUp) * baseDamage);
 	}// even requests are for damage.
 	if (request != 7) {
 		if (GetArraySize(HandicapSelectedValues[client]) != 4) SetClientHandicapValues(client, true);

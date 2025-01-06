@@ -111,12 +111,11 @@ public Action OnPlayerRunCmd(client, &buttons) {
 				/*
 					THIS IS SPAMMY WHEN TANKS ARE ALIVE. DO SOMETHING ABOUT IT.
 				*/
-				int numSurvivorsNear = NearbySurvivors(client, 2048.0);
+				int numSurvivorsNear = NearbySurvivors(client, fTankEnrageDistanceFromSurvivors);
 				//if there are no nearby survivors (tank spawned ahead or people are rushing)
 				if (numSurvivorsNear < 1) {
-					// if we've been around for a while, kill the tank
-					if (myLifetime > 180) DeleteMeFromExistence(client);
-					else SetSpeedMultiplierBase(client, fEnrageTankMovementSpeed);	// otherwise make him super fast so he can catch the survivors.
+					ChangeTankState(client, TANKSTATE_HULK);
+					SetSpeedMultiplierBase(client, fEnrageTankMovementSpeed);	// otherwise make him super fast so he can catch the survivors.
 				}	// but if survivors are nearby, reset the tanks speed based on his current mutation.
 				else CheckTankSubroutine(client);
 			}

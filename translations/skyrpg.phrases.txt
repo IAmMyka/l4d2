@@ -3,6 +3,11 @@
 
 "Phrases"
 {
+	"stuck time required remaining for teleport"
+	{
+		"#format"			"{1:s},{2:s},{3:s},{4:i},{5:s}"
+		"en"				"{1}Teleporting you to a random teammate {2}if you remain still for {3}{4} {5}more second(s)."
+	}
 	"100 materials"
 	{
 		"en"				"+100 Crafting Materials"

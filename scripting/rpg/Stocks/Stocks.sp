@@ -214,6 +214,112 @@ stock int GetConfigValueInt(char[] KeyName, int defaultValue = -1) {
 	return defaultValue;
 }
 
+//this method gets all the living survivors that exist and puts them into a list so one of them can be RANDOMLY selected.
+stock int GetRandomLivingSurvivor(int skipClient = 0) {
+	Handle randomSurvivorList = CreateArray(4);
+	int survivor = 0;
+	for (int i = 1; i <= MaxClients; i++) {
+		if (skipClient > 0 && i == skipClient || !IsLegitimateClientAlive(i) || GetClientTeam(i) != TEAM_SURVIVOR) continue;
+		PushArrayCell(randomSurvivorList, i);
+	}
+	int size = GetArraySize(randomSurvivorList);
+	if (size > 0) {
+		survivor = GetArrayCell(randomSurvivorList, GetRandomInt(0, size-1));
+	}
+	CloseHandle(randomSurvivorList);
+	return survivor;
+}
+
+public Action Timer_TeleportStuckClientToEarlierPath(Handle timer, any client) {
+	if (!IsLegitimateClientAlive(client)) return Plugin_Stop;
+	
+	float pos[3];
+	GetClientAbsOrigin(client, pos);
+	if (GetVectorDistance(stuckClientPos[client], pos) < 1.0) {
+		clientStuckTime[client]++;
+		if (bPlayerClaimsToBeStuck[client] && iStuckTimeRequiredToTeleport - clientStuckTime[client] > 0) {
+			// {ORANGE}Teleporting {WHITE}if you remain still in {GREEN}{TIME} {WHITE}seconds
+			PrintToChat(client, "%T", "stuck time required remaining for teleport", client, orange, white, green, iStuckTimeRequiredToTeleport - clientStuckTime[client], white);
+		}
+		if (clientStuckTime[client] >= iStuckTimeRequiredToTeleport) {
+			if (TeleportEntityIfStuck(client)) {
+				LogMessage("%N was stuck for %d second(s) and was teleported.", client, iStuckTimeRequiredToTeleport);
+			}
+			clientStuckTime[client] = 0;
+			SetEntityMoveType(client, MOVETYPE_WALK);
+			lastStuckTime[client] = GetTime() + iStuckDelayTime;
+			return Plugin_Stop;
+		}
+		return Plugin_Continue;
+	}
+	else if (bPlayerClaimsToBeStuck[client]) {
+		bPlayerClaimsToBeStuck[client] = false;
+	}
+	return Plugin_Stop;
+}
+
+stock bool TeleportEntityIfStuck(int client) {
+	int survivor = GetRandomLivingSurvivor(client);
+	if (survivor == 0) return false;	// no survivors found that can teleport this entity to.
+
+	float pos[3];
+	int size = GetArraySize(h_KilledPosition[survivor]);
+	if (size < 1) {
+		// kill positions are disabled so the tank must teleport directly to the player instead of a previous location of the player instead.
+		GetClientAbsOrigin(survivor, pos);
+	}
+	else {
+		// the tank is teleported to the oldest kill position for a survivor, hopefully not right on top of them.
+		pos[0] = GetArrayCell(h_KilledPosition[survivor], size-1);
+		pos[1] = GetArrayCell(h_KilledPosition[survivor], size-1, 1);
+		pos[2] = GetArrayCell(h_KilledPosition[survivor], size-1, 2);
+	}
+	TeleportEntity(client, pos, NULL_VECTOR, NULL_VECTOR);
+	return true;
+}
+
+stock bool CheckKillPositions(client, bool b_AddPosition = false) {
+
+	// If the finale is active, we don't do anything here, and always return false.
+	//if (!b_IsFinaleActive) return false;
+	// If there are enemy combatants within range - and thus the player is fighting - don't save locations.
+	//if (EnemyCombatantsWithinRange(client, StringToFloat(GetConfigValue("out of combat distance?")))) return false;
+
+	// If not adding a kill position, it means we need to check the clients current position against all positions in the list, and see if any are within the config value.
+	// If they are, we return true, otherwise false.
+	// If we are adding a position, we check to see if the size is greater than the max value in the config. If it is, we remove the oldest entry, and add the newest entry.
+	// We can do this by removing from array, or just resizing the array to the config value after adding the value.
+
+	float Origin[3];
+	GetClientAbsOrigin(client, Origin);
+	if (!b_AddPosition) {
+		int size				= GetArraySize(h_KilledPosition[client]);
+		float storedPositions[3];
+		for (int i = 0; i < size; i++) {
+			storedPositions[0] = GetArrayCell(h_KilledPosition[client], i);
+			storedPositions[1] = GetArrayCell(h_KilledPosition[client], i, 1);
+			storedPositions[2] = GetArrayCell(h_KilledPosition[client], i, 2);
+
+			// If the players current position is too close to any stored positions, return true
+			if (GetVectorDistance(Origin, storedPositions) <= fAntiFarmDistance) return true;
+		}
+	}
+	else {
+
+		int newsize = GetArraySize(h_KilledPosition[client]);
+
+		PushArrayCell(h_KilledPosition[client], Origin[0]);
+		SetArrayCell(h_KilledPosition[client], newsize, Origin[1], 1);
+		SetArrayCell(h_KilledPosition[client], newsize, Origin[2], 2);
+
+		// if adding the new position put the player over the stored limit, remove the oldest entry.
+		while (GetArraySize(h_KilledPosition[client]) > iAntiFarmMax) {
+			RemoveFromArray(h_KilledPosition[client], 0);
+		}
+	}
+	return false;
+}
+
 /*
  *	Checks if any survivors are incapacitated.
  *	@return		true/false		depending on the result.
@@ -853,7 +959,16 @@ stock int IfCommonInfectedIsAttackerDoStuff(attacker, victim, damagetype, surviv
 	return damageToReturn;
 }
 
+stock void CheckConsecutiveHits(int attacker, int victim) {
+	if (LastAttackedUser[attacker] == victim) ConsecutiveHits[attacker]++;
+	else {
+		LastAttackedUser[attacker] = victim;
+		ConsecutiveHits[attacker] = 0;
+	}
+}
+
 stock int IfInfectedIsAttackerDoStuff(attacker, victim) {
+	CheckConsecutiveHits(attacker, victim);
 	if (b_IsJumping[victim]) ModifyGravity(victim);
 	int infectedZombieClass = FindZombieClass(attacker);
 	char stringRef[64];
@@ -900,11 +1015,7 @@ stock int IfSurvivorIsAttackerDoStuff(int attacker, int victim, int baseWeaponDa
 	bool IsAttackerFake = IsFakeClient(attacker);
 	LastWeaponDamage[attacker] = baseWeaponDamage;
 	if (!IsAttackerFake && iDisplayHealthBars == 1) DisplayInfectedHealthBars(attacker, victim);
-	if (LastAttackedUser[attacker] == victim) ConsecutiveHits[attacker]++;
-	else {
-		LastAttackedUser[attacker] = victim;
-		ConsecutiveHits[attacker] = 0;
-	}
+	CheckConsecutiveHits(attacker, victim);
 	if (!IsAttackerFake && (damagetype & DMG_BULLET) && IsSpecialCommonInRange(attacker, 'd')) {
 		SetClientTotalHealth(victim, attacker, getDamageIncreaseFromBuffer(attacker, baseWeaponDamage, "d"));
 	}
@@ -4896,17 +5007,35 @@ stock bool IsVectorsCrossed(client, float torigin[3], float aorigin[3], float f_
 	return false;
 }
 
+stock float GetNearestEnemyToClient(int client) {
+	float clientPos[3];
+	float targetPos[3];
+
+	GetEntPropVector(client, Prop_Send, "m_vecOrigin", clientPos);
+
+	float nearest = fTeleportTankMaxDistance;	// 256.0 by default, can be changed in the config
+	for (int i = 1; i <= MaxClients; i++) {
+		if (i == client || !IsLegitimateClientAlive(i) || GetClientTeam(client) != GetClientTeam(i)) continue;
+		GetEntPropVector(i, Prop_Send, "m_vecOrigin", targetPos);
+		float distance = GetVectorDistance(clientPos, targetPos);
+		if (distance < nearest) nearest = distance;
+	}
+	return nearest;
+}
+
 public OnEntityDestroyed(entity) {
 	int rock = FindListPositionByEntity(entity, ActiveTankRocks);
 	if (rock >= 0) {
 		int tankToTeleport = GetArrayCell(ActiveTankRocks, rock, 1);
 		if (IsLegitimateClientAlive(tankToTeleport) && FindZombieClass(tankToTeleport) == ZOMBIECLASS_TANK) {
-			float rockPos[3];
-			GetEntPropVector(entity, Prop_Send, "m_vecOrigin", rockPos);
-			if (SurvivorsInRangeOfPosition(rockPos, 64.0)) {
+			// if the rock is destroyed further from any of the survivors than the tank is, the tank gets mad, rawr, hulk strength!
+			if (GetNearestEnemyToClient(entity) >= GetNearestEnemyToClient(tankToTeleport)) {
 				ChangeTankState(tankToTeleport, TANKSTATE_HULK);
 			}
 			else {
+				// the tank can teleport to JUST out of reach of the survivors, giving them a few seconds to get to safety.
+				float rockPos[3];
+				GetEntPropVector(entity, Prop_Send, "m_vecOrigin", rockPos);
 				TeleportEntity(tankToTeleport, rockPos, NULL_VECTOR, NULL_VECTOR);
 				CreateTimer(0.1, Timer_CheckIfTankIsStuck, tankToTeleport, TIMER_FLAG_NO_MAPCHANGE);
 			}
@@ -4928,7 +5057,7 @@ public OnEntityDestroyed(entity) {
 	}
 }
 
-bool SurvivorsInRangeOfPosition(float pos[3], float range) {
+stock bool SurvivorsInRangeOfPosition(float pos[3], float range) {
 	for (int i = 1; i <= MaxClients; i++) {
 		if (!IsLegitimateClientAlive(i) || myCurrentTeam[i] != TEAM_SURVIVOR) continue;
 		float cpos[3];

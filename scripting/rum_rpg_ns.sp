@@ -562,6 +562,10 @@ stock LoadMainConfig() {
 	fSuperCommonVisualEffectCullRange	= GetConfigValueFloat("super common visuals cull range?", 2048.0);
 	iMaximumEnrageLeniency				= GetConfigValueInt("maximum survivors enrage leniency?", 10);
 	fEnragePeriodLeniency				= GetConfigValueFloat("enrage time to add per leniency?", 0.1);
+	fTeleportTankMaxDistance			= GetConfigValueFloat("teleport tank max distance?", 256.0);
+	iStuckTimeRequiredToTeleport		= GetConfigValueInt("stuck time required to teleport?", 10);
+	fTankEnrageDistanceFromSurvivors	= GetConfigValueFloat("tank forced enrage distance from survivors?", 1024.0);
+	fInfectedConsecutiveHitDamageUp		= GetConfigValueFloat("infected consecutive hit base damage up?", 0.05);
 	
 	GetConfigValue(TheRequiredGamemode, sizeof(TheRequiredGamemode), "gametype?");
 	GetConfigValue(acmd, sizeof(acmd), "action slot command?");

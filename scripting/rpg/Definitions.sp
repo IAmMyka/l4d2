@@ -1,6 +1,4 @@
 #define LOOT_DEBUG						true
-#define WITCH_NOT_ACTIVATED				0
-#define WITCH_ATTACKING					1
 
 #define NICK_MODEL						"models/survivors/survivor_gambler.mdl"
 #define ROCHELLE_MODEL					"models/survivors/survivor_producer.mdl"
@@ -17,7 +15,7 @@
 #define MAX_CHAT_LENGTH					1024
 #define COOPRECORD_DB					"db_season_coop"
 #define SURVRECORD_DB					"db_season_surv"
-#define PLUGIN_VERSION					"v4.7.2"
+#define PLUGIN_VERSION					"v4.8.1"
 #define PROFILE_VERSION					"v1.5"
 #define PLUGIN_CONTACT					"skyy"
 #define PLUGIN_NAME						"skyrpg"
@@ -538,7 +536,19 @@
 #define LOOTREASON_CLIENTDOESNTWANTIT 2
 #define LOOTREASON_CLIENTSTOLELOOT 3
 #define LOOTREASON_CLIENTISOWNER 4
+// Witch Stuff
+#define WITCH_NOT_ACTIVATED		0
+#define WITCH_ATTACKING			1
+#define WITCH_LAST_ATTACKED_USER 2
+#define WITCH_CONSECUTIVE_HITS 3
 
+float fInfectedConsecutiveHitDamageUp;
+float fTankEnrageDistanceFromSurvivors;
+float stuckClientPos[MAXPLAYERS + 1][3];
+int clientStuckTime[MAXPLAYERS + 1];
+bool bPlayerClaimsToBeStuck[MAXPLAYERS + 1];
+int iStuckTimeRequiredToTeleport;
+float fTeleportTankMaxDistance;
 bool bPluginHasLoaded = false;
 char TheRequiredGamemode[64];
 int iMaximumEnrageLeniency;

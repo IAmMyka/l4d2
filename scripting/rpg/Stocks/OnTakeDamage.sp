@@ -219,6 +219,22 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 					}
 				}
 				else if (attackerType == 2) {
+					int pos		= FindListPositionByEntity(attacker, WitchList);
+					int witchLastAttackedUser = GetArrayCell(WitchList, pos, WITCH_LAST_ATTACKED_USER);
+					int witchConsecutiveHits = 0;
+					if (witchLastAttackedUser == victim) {
+						witchConsecutiveHits = GetArrayCell(WitchList, pos, WITCH_CONSECUTIVE_HITS);
+						SetArrayCell(WitchList, pos, witchConsecutiveHits + 1, WITCH_CONSECUTIVE_HITS);
+					}
+					else {
+						SetArrayCell(WitchList, pos, victim, WITCH_LAST_ATTACKED_USER);
+						SetArrayCell(WitchList, pos, 0, WITCH_CONSECUTIVE_HITS);
+					}
+					if (LastAttackedUser[attacker] == victim) ConsecutiveHits[attacker]++;
+					else {
+						LastAttackedUser[attacker] = victim;
+						ConsecutiveHits[attacker] = 0;
+					}
 					char stringRef[64];
 					int i_WitchDamage = GetCharacterSheetData(victim, stringRef, 64, 4, _, attacker);
 					int i_WitchDamageIncreaseFromBuffer = getDamageIncreaseFromBuffer(attacker, i_WitchDamage);

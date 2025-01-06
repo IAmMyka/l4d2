@@ -372,6 +372,9 @@ public Call_Event(Handle event, char[] event_name, bool dontBroadcast, pos) {
 			b_GroundRequired[attacker] = false;
 			HasSeenCombat[attacker] = false;
 			MyBirthday[attacker] = GetTime();
+			ConsecutiveHits[attacker] = 0;
+			GetClientAbsOrigin(attacker, stuckClientPos[attacker]);
+			CreateTimer(1.0, Timer_TeleportStuckClientToEarlierPath, attacker, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 			int iTankCount = GetInfectedCount(ZOMBIECLASS_TANK);
 			int iTankLimit = DirectorTankLimit();
 			int theClient = FindAnyRandomClient();

@@ -7,48 +7,6 @@ float GetDistanceBetweenTwoPoints(float a, float b) {
 	if (b > a) return b - a;
 	return 0.0;
 }
-
-stock bool CheckKillPositions(client, bool b_AddPosition = false) {
-
-	// If the finale is active, we don't do anything here, and always return false.
-	//if (!b_IsFinaleActive) return false;
-	// If there are enemy combatants within range - and thus the player is fighting - don't save locations.
-	//if (EnemyCombatantsWithinRange(client, StringToFloat(GetConfigValue("out of combat distance?")))) return false;
-
-	// If not adding a kill position, it means we need to check the clients current position against all positions in the list, and see if any are within the config value.
-	// If they are, we return true, otherwise false.
-	// If we are adding a position, we check to see if the size is greater than the max value in the config. If it is, we remove the oldest entry, and add the newest entry.
-	// We can do this by removing from array, or just resizing the array to the config value after adding the value.
-
-	float Origin[3];
-	GetClientAbsOrigin(client, Origin);
-	if (!b_AddPosition) {
-		int size				= GetArraySize(h_KilledPosition[client]);
-		float storedPositions[3];
-		for (int i = 0; i < size; i++) {
-			storedPositions[0] = GetArrayCell(h_KilledPosition[client], i);
-			storedPositions[1] = GetArrayCell(h_KilledPosition[client], i, 1);
-			storedPositions[2] = GetArrayCell(h_KilledPosition[client], i, 2);
-
-			// If the players current position is too close to any stored positions, return true
-			if (GetVectorDistance(Origin, storedPositions) <= fAntiFarmDistance) return true;
-		}
-	}
-	else {
-
-		int newsize = GetArraySize(h_KilledPosition[client]);
-
-		PushArrayCell(h_KilledPosition[client], Origin[0]);
-		SetArrayCell(h_KilledPosition[client], newsize, Origin[1], 1);
-		SetArrayCell(h_KilledPosition[client], newsize, Origin[2], 2);
-
-		// if adding the new position put the player over the stored limit, remove the oldest entry.
-		while (GetArraySize(h_KilledPosition[client]) > iAntiFarmMax) {
-			RemoveFromArray(h_KilledPosition[client], 0);
-		}
-	}
-	return false;
-}
 /*
 int TheTalentStrength = GetArrayCell(MyTalentStrength[client], i);
 			if (TheTalentStrength < 1) continue;

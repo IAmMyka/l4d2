@@ -487,15 +487,11 @@ public Action CMD_DropWeapon(int client, int args) {
 
 public Action CMD_IAmStuck(int client, int args) {
 	int timeremaining = lastStuckTime[client] - GetTime();
-	if (timeremaining <= 0 && !bIsInCombat[client] && L4D2_GetInfectedAttacker(client) == -1 && !AnyTanksNearby(client, 5096.0)) {
-		int target = FindAnyRandomClient(true, client);
-		if (target > 0) {
-			GetClientAbsOrigin(target, DeathLocation[client]);
-			TeleportEntity(client, DeathLocation[client], NULL_VECTOR, NULL_VECTOR);
-			SetEntityMoveType(client, MOVETYPE_WALK);
-			lastStuckTime[client] = GetTime() + iStuckDelayTime;
-		}
-		else PrintToChat(client, "\x04Can't find anyone to teleport you to, sorry bud.");
+	if (timeremaining <= 0 && L4D2_GetInfectedAttacker(client) == -1) {
+		clientStuckTime[client] = 0;
+		bPlayerClaimsToBeStuck[client] = true;
+		GetClientAbsOrigin(client, stuckClientPos[client]);
+		CreateTimer(1.0, Timer_TeleportStuckClientToEarlierPath, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
 	else {
 		char text[64];
