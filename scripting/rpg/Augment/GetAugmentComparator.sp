@@ -43,15 +43,15 @@ stock void GetAugmentComparator(int client, int slot, char[] augmentName, char[]
 	GetAugmentSurname(client, slot, actText, 64, tarText, 64);
 
 	if (activatorRating < 1 && targetRating < 1) Format(itemStr, 64, "Minor");
-	else if (!StrEqual(actText, "-1") && !StrEqual(tarText, "-1")) Format(itemStr, 64, "Perfect %s %s", actText, tarText);
-	else if (!StrEqual(actText, "-1")) Format(itemStr, 64, "Major %s", actText);
-	else Format(itemStr, 64, "Major %s", tarText);
-	Format(text, sizeof(text), "%s %s %s Augment", itemStr, menuText, baseMenuText[len]);
+	else if (activatorRating > 0 && targetRating > 0) Format(itemStr, 64, "Perfect %s %s", actText, tarText);
+	else Format(itemStr, 64, "Major %s", actText);
+
+	Format(text, sizeof(text), "%s", itemStr);
 	Format(augmentName, 64, "%s", text);
 	if (justGetTalentName) Format(augmentCategory, 64, "%s %s", menuText, baseMenuText[len]);
 	else {
-		if (!replaceStr) Format(text, sizeof(text), "\n\t+%3.1f%s to %s %s talents", (iItemLevel * fAugmentRatingMultiplier) * 100.0, pct, menuText, baseMenuText[len]);
-		else Format(text, sizeof(text), "\n\t+%3.1f{PCT} to %s %s talents", (iItemLevel * fAugmentRatingMultiplier) * 100.0, menuText, baseMenuText[len]);
+		if (!replaceStr) Format(text, sizeof(text), "\n\t+%3.1f%s to %s %s", (iItemLevel * fAugmentRatingMultiplier) * 100.0, pct, menuText, baseMenuText[len]);
+		else Format(text, sizeof(text), "\n\t+%3.1f{PCT} to %s %s", (iItemLevel * fAugmentRatingMultiplier) * 100.0, menuText, baseMenuText[len]);
 		Format(augmentCategory, 64, "%s", text);
 	}
 	
@@ -60,8 +60,8 @@ stock void GetAugmentComparator(int client, int slot, char[] augmentName, char[]
 		Format(activatorText, 64, "%T", activatorText, client);
 		if (justGetTalentName) Format(augmentActivator, 128, "%s", activatorText);
 		else {
-			if (!replaceStr) Format(text, sizeof(text), "\t\t+%3.1f%s to %s talents", (activatorRating * fAugmentActivatorRatingMultiplier) * 100.0, pct, activatorText);
-			else Format(text, sizeof(text), "\t\t+%3.1f{PCT} to %s talents", (activatorRating * fAugmentActivatorRatingMultiplier) * 100.0, activatorText);
+			if (!replaceStr) Format(text, sizeof(text), "\t\t+%3.1f%s to %s", (activatorRating * fAugmentActivatorRatingMultiplier) * 100.0, pct, activatorText);
+			else Format(text, sizeof(text), "\t\t+%3.1f{PCT} to %s", (activatorRating * fAugmentActivatorRatingMultiplier) * 100.0, activatorText);
 			Format(augmentActivator, 128, "%s", text);
 		}
 	}
@@ -72,8 +72,8 @@ stock void GetAugmentComparator(int client, int slot, char[] augmentName, char[]
 		Format(targetText, 64, "%T", targetText, client);
 		if (justGetTalentName) Format(augmentTarget, 128, "%s", targetText);
 		else {
-			if (!replaceStr) Format(text, sizeof(text), "\t\t+%3.1f%s to %s talents", (targetRating * fAugmentTargetRatingMultiplier) * 100.0, pct, targetText);
-			else Format(text, sizeof(text), "\t\t+%3.1f{PCT} to %s talents", (targetRating * fAugmentTargetRatingMultiplier) * 100.0, targetText);
+			if (!replaceStr) Format(text, sizeof(text), "\t\t+%3.1f%s to %s", (targetRating * fAugmentTargetRatingMultiplier) * 100.0, pct, targetText);
+			else Format(text, sizeof(text), "\t\t+%3.1f{PCT} to %s", (targetRating * fAugmentTargetRatingMultiplier) * 100.0, targetText);
 			Format(augmentTarget, 128, "%s", text);
 		}
 	}

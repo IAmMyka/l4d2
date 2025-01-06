@@ -5014,8 +5014,9 @@ stock float GetNearestEnemyToClient(int client) {
 	GetEntPropVector(client, Prop_Send, "m_vecOrigin", clientPos);
 
 	float nearest = fTeleportTankMaxDistance;	// 256.0 by default, can be changed in the config
+	bool isRockOrCommon = (IsLegitimateClient(client)) ? false : true;
 	for (int i = 1; i <= MaxClients; i++) {
-		if (i == client || !IsLegitimateClientAlive(i) || GetClientTeam(client) != GetClientTeam(i)) continue;
+		if (i == client || !IsLegitimateClientAlive(i) || isRockOrCommon && GetClientTeam(i) != TEAM_SURVIVOR || !isRockOrCommon && GetClientTeam(client) != GetClientTeam(i)) continue;
 		GetEntPropVector(i, Prop_Send, "m_vecOrigin", targetPos);
 		float distance = GetVectorDistance(clientPos, targetPos);
 		if (distance < nearest) nearest = distance;

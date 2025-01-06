@@ -358,7 +358,7 @@
 	}
 	"cdr perfect surname"
 	{
-		"en"				"Accelerating"
+		"en"				"Haste"
 	}
 	"speed perfect surname"
 	{
@@ -374,11 +374,11 @@
 	}
 	"snipersmark major surname"
 	{
-		"en"				"Snipers Mark"
+		"en"				"Snipers"
 	}
 	"snipersmark perfect surname"
 	{
-		"en"				"Snipers Mark"
+		"en"				"Snipers"
 	}
 	"b perfect surname"
 	{
@@ -442,7 +442,7 @@
 	}
 	"cdr major surname"
 	{
-		"en"				"Accelerating"
+		"en"				"Haste"
 	}
 	"speed major surname"
 	{
@@ -454,7 +454,7 @@
 	}
 	"activetime major surname"
 	{
-		"en"				"Spellcasters"
+		"en"				"Wizards"
 	}
 	"weak damage increase i"
 	{
@@ -630,15 +630,15 @@
 	}
 	"snipersmark perfect surname"
 	{
-		"en"				"Snipers Mark"
+		"en"				"Snipers"
 	}
 	"snipersmark major surname"
 	{
-		"en"				"Snipers Mark"
+		"en"				"Snipers"
 	}
 	"snipersmark augment info"
 	{
-		"en"				"Snipers Mark"
+		"en"				"Snipers"
 	}
 	"healmelee augment info"
 	{
@@ -646,11 +646,11 @@
 	}
 	"R perfect surname"
 	{
-		"en"				"Thorns"
+		"en"				"Reflective"
 	}
 	"R major surname"
 	{
-		"en"				"Thorns"
+		"en"				"Reflective"
 	}
 	"R augment info"
 	{
@@ -766,7 +766,7 @@
 	}
 	"activetime augment info"
 	{
-		"en"				"Spellcasters"
+		"en"				"Wizards"
 	}
 	"b augment info"
 	{
@@ -4668,7 +4668,7 @@
 	}
 	"yerawizard increase"
 	{
-		"en"				"Spellcasters Proficiency"
+		"en"				"Wizards Proficiency"
 	}
 	"yerawizard increase info"
 	{
@@ -4676,19 +4676,19 @@
 	}
 	"spellhaste i"
 	{
-		"en"				"Spellcasters Haste I"
+		"en"				"Wizards Haste I"
 	}
 	"spellhaste ii"
 	{
-		"en"				"Spellcasters Haste II"
+		"en"				"Wizards Haste II"
 	}
 	"spellhaste iii"
 	{
-		"en"				"Spellcasters Haste III"
+		"en"				"Wizards Haste III"
 	}
 	"spellhaste iv"
 	{
-		"en"				"Spellcasters Haste IV"
+		"en"				"Wizards Haste IV"
 	}
 	"spellhaste info"
 	{
@@ -4696,11 +4696,11 @@
 	}
 	"spellefficiency i"
 	{
-		"en"				"Spellcasters Focus I"
+		"en"				"Wizards Focus I"
 	}
 	"spellefficiency ii"
 	{
-		"en"				"Spellcasters Focus II"
+		"en"				"Wizards Focus II"
 	}
 	"spellefficiency info"
 	{
@@ -4708,23 +4708,23 @@
 	}
 	"spellmastery i"
 	{
-		"en"				"Spellcasters Mastery I"
+		"en"				"Wizards Mastery I"
 	}
 	"spellmastery ii"
 	{
-		"en"				"Spellcasters Mastery II"
+		"en"				"Wizards Mastery II"
 	}
 	"spellmastery iii"
 	{
-		"en"				"Spellcasters Mastery III"
+		"en"				"Wizards Mastery III"
 	}
 	"spellmastery iv"
 	{
-		"en"				"Spellcasters Mastery IV"
+		"en"				"Wizards Mastery IV"
 	}
 	"spellmastery v"
 	{
-		"en"				"Spellcasters Mastery V"
+		"en"				"Wizards Mastery V"
 	}
 	"spellmastery info"
 	{
@@ -4732,15 +4732,15 @@
 	}
 	"spellagency i"
 	{
-		"en"				"Spellcasters Agency I"
+		"en"				"Wizards Agency I"
 	}
 	"spellagency ii"
 	{
-		"en"				"Spellcasters Agency II"
+		"en"				"Wizards Agency II"
 	}
 	"spellagency iii"
 	{
-		"en"				"Spellcasters Agency III"
+		"en"				"Wizards Agency III"
 	}
 	"spellagency info"
 	{
@@ -5817,7 +5817,7 @@
 	}
 	"snipers mark path i"
 	{
-		"en"				"(EoT)Snipers Mark I"
+		"en"				"(EoT)Snipers I"
 	}
 	"snipers mark path i info"
 	{
@@ -6766,7 +6766,7 @@
 	}
 	"thorns talent"
 	{
-		"en"				"Thorns"
+		"en"				"Reflective"
 	}
 	"danger will robinson"
 	{

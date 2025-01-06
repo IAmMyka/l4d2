@@ -55,21 +55,40 @@ public Handle Augments_Equip(client) {
 			DrawPanelItem(menu, "<empty>");
 			continue;
 		}
-		GetArrayString(equippedAugmentsActivator[client], i, activatorText, 64);
-		GetArrayString(equippedAugmentsTarget[client], i, targetText, 64);
-		Format(menuText, 64, "%T", menuText, client);
-		int iItemLevel = GetArrayCell(equippedAugments[client], i, 2);
+		char augmentName[64], augmentCategory[64], augmentActivator[64], augmentTarget[64];
+		GetAugmentComparator(client, i, augmentName, augmentCategory, augmentActivator, augmentTarget, _, true);
+		char augmentCatStr[64], augmentActStr[64], augmentTarStr[64];
+		char augmentTitle[64];
+		GetAugmentStrength(client, i, 0, augmentCatStr);
+		GetAugmentStrength(client, i, 1, augmentActStr);
+		GetAugmentStrength(client, i, 2, augmentTarStr);
+		Format(augmentTitle, sizeof(augmentTitle), "%s %s %s", augmentName, augmentCatStr, augmentCategory);
+		Format(text, sizeof(text), "%s", augmentTitle);
+		if (!StrEqual(augmentActivator, "-1")) {
+			Format(augmentActStr, sizeof(augmentActStr), "%s %s", augmentActStr, augmentActivator);
+			Format(text, sizeof(text), "%s\n%s", text, augmentActStr);
+		}
+		if (!StrEqual(augmentTarget, "-1")) {
+			Format(augmentTarStr, sizeof(augmentTarStr), "%s %s", augmentTarStr, augmentTarget);
+			Format(text, sizeof(text), "%s\n%s", text, augmentTarStr);
+		}
 
-		int activatorRating = GetArrayCell(equippedAugments[client], i, 4);
-		int targetRating = GetArrayCell(equippedAugments[client], i, 5);
+
+		// GetArrayString(equippedAugmentsActivator[client], i, activatorText, 64);
+		// GetArrayString(equippedAugmentsTarget[client], i, targetText, 64);
+		// Format(menuText, 64, "%T", menuText, client);
+		// int iItemLevel = GetArrayCell(equippedAugments[client], i, 2);
+
+		// int activatorRating = GetArrayCell(equippedAugments[client], i, 4);
+		// int targetRating = GetArrayCell(equippedAugments[client], i, 5);
 		
-		GetAugmentSurname(client, augmentPos, activatorText, 64, targetText, 64);
-		if (activatorRating < 1 && targetRating < 1) Format(itemStr, 64, "Minor");
-		else if (!StrEqual(activatorText, "-1") && !StrEqual(targetText, "-1")) Format(itemStr, 64, "Perfect %s %s", activatorText, targetText);
-		else if (!StrEqual(activatorText, "-1")) Format(itemStr, 64, "Major %s", activatorText);
-		else Format(itemStr, 64, "Major %s", targetText);
+		// GetAugmentSurname(client, augmentPos, activatorText, 64, targetText, 64);
+		// if (activatorRating < 1 && targetRating < 1) Format(itemStr, 64, "Minor");
+		// else if (activatorRating > 0 && targetRating > 0) Format(itemStr, 64, "Perfect %s %s", activatorText, targetText);
+		// else if (activatorRating > 0) Format(itemStr, 64, "Major %s", activatorText);
+		// else Format(itemStr, 64, "Major %s", targetText);
 
-		Format(text, sizeof(text), "+%3.1f%s %s %s %s", (iItemLevel * fAugmentRatingMultiplier) * 100.0, pct, itemStr, menuText, baseMenuText[len]);
+		// Format(text, sizeof(text), "+%3.1f%s %s %s %s", (iItemLevel * fAugmentRatingMultiplier) * 100.0, pct, itemStr, menuText, baseMenuText[len]);
 		DrawPanelItem(menu, text);
 	}
 	
@@ -249,14 +268,21 @@ stock EquipAugment_Confirm(int client, int pos, int augmentInspectionOverride = 
 
 stock void GetAugmentSurname(int client, int pos, char[] surname, int surnameSize, char[] surname2, int surname2Size, bool bFormatTranslation = true) {
 	GetArrayString(myAugmentActivatorEffects[client], pos, surname, surnameSize);
-	if (!StrEqual(surname, "-1")) {
-		Format(surname, surnameSize, "%s major surname", surname);
-		if (bFormatTranslation) Format(surname, surnameSize, "%T", surname, client);
-	}
 	GetArrayString(myAugmentTargetEffects[client], pos, surname2, surname2Size);
-	if (!StrEqual(surname2, "-1")) {
+	bool surname1IsEmpty = (StrEqual(surname, "-1")) ? true : false;
+	bool surname2IsEmpty = (StrEqual(surname2, "-1")) ? true : false;
+	if (!surname1IsEmpty && !surname2IsEmpty) {
+		// perfect
+		Format(surname, surnameSize, "%s perfect surname", surname);
+		if (bFormatTranslation) Format(surname, surnameSize, "%T", surname, client);
+
 		Format(surname2, surname2Size, "%s perfect surname", surname2);
 		if (bFormatTranslation) Format(surname2, surname2Size, "%T", surname2, client);
+	}
+	else if (!surname1IsEmpty || !surname2IsEmpty) {
+		if (!surname1IsEmpty) Format(surname, surnameSize, "%s major surname", surname);
+		else Format(surname, surnameSize, "%s major surname", surname2);
+		if (bFormatTranslation) Format(surname, surnameSize, "%T", surname, client);
 	}
 }
 
@@ -850,22 +876,22 @@ stock Augments_Inventory(client) {
 				char augmentName[64], augmentCategory[64], augmentActivator[64], augmentTarget[64];
 				GetAugmentComparator(client, i, augmentName, augmentCategory, augmentActivator, augmentTarget, _, true);
 				char augmentCatStr[64], augmentActStr[64], augmentTarStr[64];
+				char augmentTitle[64];
 				GetAugmentStrength(client, i, 0, augmentCatStr);
 				GetAugmentStrength(client, i, 1, augmentActStr);
 				GetAugmentStrength(client, i, 2, augmentTarStr);
-				Format(augmentCatStr, sizeof(augmentCatStr), "%s %s", augmentCatStr, augmentCategory);
-				Format(augmentCatStr, sizeof(augmentCatStr), "%s (slot %d)", augmentCatStr, isEquipped+1);
+				Format(augmentTitle, sizeof(augmentTitle), "%s %s %s (%d)", augmentName, augmentCatStr, augmentCategory, isEquipped+1);
 				char augmentOwner[64];
 				GetArrayString(myAugmentOwners[client], i, augmentOwner, sizeof(augmentOwner));
 				
 				bool isNotOriginalOwner = (StrContains(augmentOwner, key, false) == -1) ? true : false;
-				if (isNotOriginalOwner) Format(augmentCatStr, sizeof(augmentCatStr), "%s^", augmentCatStr);
+				if (isNotOriginalOwner) Format(augmentTitle, sizeof(augmentTitle), "%s^", augmentTitle);
 
 				char profilesSavedTo[64];
 				GetArrayString(myAugmentSavedProfiles[client], i, profilesSavedTo, sizeof(profilesSavedTo));
-				if (!StrEqual(profilesSavedTo, "none")) Format(augmentCatStr, sizeof(augmentCatStr), "%s!", augmentCatStr);
+				if (!StrEqual(profilesSavedTo, "none")) Format(augmentTitle, sizeof(augmentTitle), "%s!", augmentTitle);
 
-				Format(text, sizeof(text), "%s", augmentCatStr);
+				Format(text, sizeof(text), "%s", augmentTitle);
 				if (!StrEqual(augmentActivator, "-1")) {
 					Format(augmentActStr, sizeof(augmentActStr), "%s %s", augmentActStr, augmentActivator);
 					Format(text, sizeof(text), "%s\n%s", text, augmentActStr);
@@ -874,6 +900,7 @@ stock Augments_Inventory(client) {
 					Format(augmentTarStr, sizeof(augmentTarStr), "%s %s", augmentTarStr, augmentTarget);
 					Format(text, sizeof(text), "%s\n%s", text, augmentTarStr);
 				}
+
 				AddMenuItem(menu, text, text);
 				break;
 			}
@@ -892,23 +919,24 @@ stock Augments_Inventory(client) {
 			char augmentName[64], augmentCategory[64], augmentActivator[64], augmentTarget[64];
 			GetAugmentComparator(client, i, augmentName, augmentCategory, augmentActivator, augmentTarget, _, true);
 			char augmentCatStr[64], augmentActStr[64], augmentTarStr[64];
+			char augmentTitle[64];
 			GetAugmentStrength(client, i, 0, augmentCatStr);
 			GetAugmentStrength(client, i, 1, augmentActStr);
 			GetAugmentStrength(client, i, 2, augmentTarStr);
-			Format(augmentCatStr, sizeof(augmentCatStr), "%s %s", augmentCatStr, augmentCategory);
-			if (isEquipped == -2) Format(augmentCatStr, sizeof(augmentCatStr), "%s*", augmentCatStr);
+			Format(augmentTitle, sizeof(augmentTitle), "%s %s %s", augmentName, augmentCatStr, augmentCategory);
+			if (isEquipped == -2) Format(augmentTitle, sizeof(augmentTitle), "%s*", augmentTitle);
 			
 			char augmentOwner[64];
 			GetArrayString(myAugmentOwners[client], i, augmentOwner, sizeof(augmentOwner));
 			
 			bool isNotOriginalOwner = (StrContains(augmentOwner, key, false) == -1) ? true : false;
-			if (isNotOriginalOwner) Format(augmentCatStr, sizeof(augmentCatStr), "%s^", augmentCatStr);
+			if (isNotOriginalOwner) Format(augmentTitle, sizeof(augmentTitle), "%s^", augmentTitle);
 			
 			char profilesSavedTo[64];
 			GetArrayString(myAugmentSavedProfiles[client], i, profilesSavedTo, sizeof(profilesSavedTo));
-			if (!StrEqual(profilesSavedTo, "none")) Format(augmentCatStr, sizeof(augmentCatStr), "%s!", augmentCatStr);
+			if (!StrEqual(profilesSavedTo, "none")) Format(augmentTitle, sizeof(augmentTitle), "%s!", augmentTitle);
 
-			Format(text, sizeof(text), "%s", augmentCatStr);
+			Format(text, sizeof(text), "%s", augmentTitle);
 			if (!StrEqual(augmentActivator, "-1")) {
 				Format(augmentActStr, sizeof(augmentActStr), "%s %s", augmentActStr, augmentActivator);
 				Format(text, sizeof(text), "%s\n%s", text, augmentActStr);
