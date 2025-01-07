@@ -216,7 +216,7 @@ stock void ClearAndLoad(int client, bool IgnoreLoad = false) {
 	char tquery[2048];
 
 	if (GetArraySize(attributeData[client]) != 6) ResizeArray(attributeData[client], 6);
-	Format(tquery, sizeof(tquery), "SELECT `steam_id`, `exp`, `expov`, `upgrade cost`, `level`, `skylevel`, `time played`, `talent points`, `total upgrades`, `free upgrades`, `restt`, `restexp`, `lpl`, `resr`, `survpoints`, `bec`, `rem`, `pri`, `xpdebt`, `upav`, `upawarded`, `%s`, `myrating %s`, `handicaplevel %s`, `lastserver`, `myseason`, `lvlpaused`, `itrails`, `augmentparts`, `dismantlescore`, `dismantleminor`, `dals`, `lootprio`, `seffects`, `sshake`, `hla` FROM `%s` WHERE (`steam_id` = '%s');", RatingType, RatingType, RatingType, TheDBPrefix, key);
+	Format(tquery, sizeof(tquery), "SELECT `steam_id`, `exp`, `expov`, `upgrade cost`, `level`, `skylevel`, `time played`, `talent points`, `total upgrades`, `free upgrades`, `restt`, `restexp`, `lpl`, `resr`, `survpoints`, `bec`, `rem`, `pri`, `xpdebt`, `upav`, `upawarded`, `%s`, `myrating %s`, `handicaplevel %s`, `lastserver`, `myseason`, `lvlpaused`, `itrails`, `augmentparts`, `dismantlescore`, `dismantleminor`, `dals`, `lootprio`, `seffects`, `sshake`, `hla`, `lootmult` FROM `%s` WHERE (`steam_id` = '%s');", RatingType, RatingType, RatingType, TheDBPrefix, key);
 	// maybe set a value equal to the users steamid integer only, so if steam:0:1:23456, set the value of "client" equal to 23456 and then set the client equal to whatever client's steamid contains 23456?
 	SQL_TQuery(hDatabase, QueryResults_Load, tquery, client);
 }
@@ -597,6 +597,7 @@ stock SavePlayerData(int client, bool b_IsTrueDisconnect = false, bool IsNewPlay
 	if (b_IsTrueDisconnect) {
 		if (bIsInCombat[client]) {
 			RoundExperienceMultiplier[client] = 0.0;
+			clientLootFindBonus[client] = 0.0;
 			BonusContainer[client] = 0;
 		}
 		bHasDonorPrivileges[client] = false;
@@ -691,7 +692,10 @@ stock SavePlayerData(int client, bool b_IsTrueDisconnect = false, bool IsNewPlay
 	char bonusMult[64];
 	Format(bonusMult, sizeof(bonusMult), "%3.3f", RoundExperienceMultiplier[client]);
 
-	Format(tquery, sizeof(tquery), "UPDATE `%s` SET `myseason` = '%s', `rem` = '%s', `lootprio` = '%d' WHERE (`steam_id` = '%s');", TheDBPrefix, RatingType, bonusMult, iLootDropsForUnlockedTalentsOnly[client], key);
+	char bonusLoot[64];
+	Format(bonusLoot, sizeof(bonusLoot), "%3.3f", clientLootFindBonus[client]);
+
+	Format(tquery, sizeof(tquery), "UPDATE `%s` SET `myseason` = '%s', `rem` = '%s', `lootprio` = '%d', `lootmult` = '%s' WHERE (`steam_id` = '%s');", TheDBPrefix, RatingType, bonusMult, iLootDropsForUnlockedTalentsOnly[client], bonusLoot, key);
 	SQL_TQuery(hDatabase, QueryResults1, tquery, client);
 
 	SQL_EscapeString(hDatabase, Hostname, text, sizeof(text));
@@ -1101,11 +1105,15 @@ public void QueryResults_Load(Handle owner, Handle hndl, const char[] error, any
 			RestedExperience[client]	=	SQL_FetchInt(hndl, 11);
 			LastPlayLength[client]		=	SQL_FetchInt(hndl, 12);
 			resr[client]				=	SQL_FetchInt(hndl, 13);
+			
 			SQL_FetchString(hndl, 14, text, sizeof(text));
 			Points[client] = StringToFloat(text);
+
 			BonusContainer[client] = SQL_FetchInt(hndl, 15);
+
 			SQL_FetchString(hndl, 16, text, sizeof(text));
 			RoundExperienceMultiplier[client] = StringToFloat(text);
+
 			PreviousRoundIncaps[client]	=	SQL_FetchInt(hndl, 17);
 			ExperienceDebt[client]		=	SQL_FetchInt(hndl, 18);
 			UpgradesAvailable[client]	=	SQL_FetchInt(hndl, 19);
@@ -1126,6 +1134,10 @@ public void QueryResults_Load(Handle owner, Handle hndl, const char[] error, any
 			iTypeOfSpecialEffectsToShow[client] = SQL_FetchInt(hndl, 33);
 			iTypeOfScreenShake[client] = SQL_FetchInt(hndl, 34);
 			handicapLevelAllowed[client] = SQL_FetchInt(hndl, 35);
+
+			SQL_FetchString(hndl, 36, text, sizeof(text));
+			clientLootFindBonus[client] = StringToFloat(text);
+
 			if (handicapLevel[client] > handicapLevelAllowed[client]) {
 				handicapLevel[client] = 0;
 			}
@@ -1457,6 +1469,7 @@ stock void ClearLocalClientData(client) {
 	Points[client] = 0.0;
 	BonusContainer[client] = 0;
 	RoundExperienceMultiplier[client] = 0.0;
+	clientLootFindBonus[client] = 0.0;
 	PreviousRoundIncaps[client]	=	0;
 	ExperienceDebt[client]		=	0;
 	UpgradesAvailable[client]	=	1;

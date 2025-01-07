@@ -11,6 +11,7 @@ stock IncapacitateOrKill(client, attacker = 0, healthvalue = 0, bool bIsFalling 
 				SetArrayCell(tempStorage, client, Rating[client], 0);
 				SetArrayCell(tempStorage, client, handicapLevel[client], 1);
 				SetArrayCell(tempStorage, client, RoundExperienceMultiplier[client], 2);
+				SetArrayCell(tempStorage, client, clientLootFindBonus[client], 3);
 			}
 			clientDeathTime[client] = GetTime();
 			HealingContribution[client] = 0;
@@ -36,24 +37,23 @@ stock IncapacitateOrKill(client, attacker = 0, healthvalue = 0, bool bIsFalling 
 			char pct[4];
 			Format(pct, sizeof(pct), "%");
 			if (iRPGMode >= 0 && IsPlayerAlive(client)) {
-
 				if (iIsLevelingPaused[client] == 1 || PlayerLevel[client] >= iMaxLevel || PlayerLevel[client] >= iHardcoreMode && fDeathPenalty > 0.0 && (iDeathPenaltyPlayers < 1 || TotalHumanSurvivors() >= iDeathPenaltyPlayers)) ConfirmExperienceActionTalents(client, true);
-
 				if (iIsLevelingPaused[client] == 1 || PlayerLevel[client] >= iMaxLevel) {
-
 					ExperienceOverall[client] -= (ExperienceLevel[client] - 1);
 					ExperienceLevel[client] = 1;
 				}
-
 				int LivingHumansCounter = LivingSurvivors() - 1;
 				if (LivingHumansCounter < 0) LivingHumansCounter = 0;
 
 				PrintToChatAll("%t", "teammate has died", blue, PlayerName, orange, green, (LivingHumansCounter * fSurvivorExpMult) * 100.0, pct);
 				if (RoundExperienceMultiplier[client] > 0.0) {
-
 					PrintToChatAll("%t", "bonus container burst", blue, PlayerName, orange, green, 100.0 * RoundExperienceMultiplier[client], orange, pct);
 					BonusContainer[client] = 0;
 					RoundExperienceMultiplier[client] = 0.0;
+				}
+				if (clientLootFindBonus[client] > 0.0) {
+					PrintToChatAll("%t", "loot find bonus container burst", blue, PlayerName, orange, green, 100.0 * clientLootFindBonus[client], orange, pct);
+					clientLootFindBonus[client] = 0.0;
 				}
 			}
 

@@ -566,6 +566,9 @@ stock LoadMainConfig() {
 	iStuckTimeRequiredToTeleport		= GetConfigValueInt("stuck time required to teleport?", 10);
 	fTankEnrageDistanceFromSurvivors	= GetConfigValueFloat("tank forced enrage distance from survivors?", 1024.0);
 	fInfectedConsecutiveHitDamageUp		= GetConfigValueFloat("infected consecutive hit base damage up?", 0.05);
+	fRoundSurvivalLootFindBonus			= GetConfigValueFloat("coop round survival loot find bonus?", 0.05);	// 5%
+	fFinaleSurvivalLootFindBonus		= GetConfigValueFloat("finale round survival loot find bonus?", 0.2);	// 20%
+	fDonatorLootBonusIncrease			= GetConfigValueFloat("round survival donator loot find bonus?", 0.3);	// 30%
 	
 	GetConfigValue(TheRequiredGamemode, sizeof(TheRequiredGamemode), "gametype?");
 	GetConfigValue(acmd, sizeof(acmd), "action slot command?");

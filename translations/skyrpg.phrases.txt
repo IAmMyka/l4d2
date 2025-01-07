@@ -3,6 +3,16 @@
 
 "Phrases"
 {
+	"living survivors loot find bonus"
+	{
+		"#format"			"{1:s},{2:s},{3:s},{4:3.3f},{5:s},{6:s}"
+		"en"				"{1}Loot Find Bonus {2}+{3}{4}{5}{6}"
+	}
+	"living survivors loot find bonus (donator)"
+	{
+		"#format"			"{1:s},{2:s},{3:s},{4:3.3f},{5:s},{6:s}"
+		"en"				"{1}Loot Find Bonus (donator) {2}+{3}{4}{5}{6}"
+	}
 	"stuck time required remaining for teleport"
 	{
 		"#format"			"{1:s},{2:s},{3:s},{4:i},{5:s}"
@@ -1683,10 +1693,15 @@
 		"#format"			"{1:s},{2:s},{3:s},{4:s}"
 		"en"				"{1}{2} {3}left during a live round.\n{4}Their progress this round was not saved, and raid (or solo) level reset."
 	}
+	"loot find bonus container burst"
+	{
+		"#format"			"{1:s},{2:s},{3:s},{4:s},{5:3.1f},{6:s},{7:s}"
+		"en"				"{1}{2} {3}loses their {4}{5}{7} {6}Loot Find Bonus"
+	}
 	"bonus container burst"
 	{
 		"#format"			"{1:s},{2:s},{3:s},{4:s},{5:3.1f},{6:s},{7:s}"
-		"en"				"{1}{2} {3}loses their {4}{5}{7} {6}XP Multiplier..."
+		"en"				"{1}{2} {3}loses their {4}{5}{7} {6}XP Multiplier"
 	}
 	"bonus experience waiting"
 	{

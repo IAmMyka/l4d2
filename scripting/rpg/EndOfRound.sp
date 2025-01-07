@@ -97,12 +97,22 @@ stock CallRoundIsOver() {
 			if (!IsSurvivalMode) {
 				int livingSurvs = LivingSurvivors();
 				float fExperienceBonus = 0.0;
-				if (livingSurvs > 1) fExperienceBonus = fCoopSurvBon * (livingSurvs-1);
-				else if (TotalHumanSurvivors() == 1) fExperienceBonus = fCoopSoloSurvBon;
+				float fLootBonus = 0.0;
+				if (livingSurvs > 1) {
+					fExperienceBonus = fCoopSurvBon * (livingSurvs-1);
+					fLootBonus = fRoundSurvivalLootFindBonus * (livingSurvs-1);
+				}
+				else if (TotalHumanSurvivors() == 1) {
+					fExperienceBonus = fCoopSoloSurvBon;
+					fLootBonus = fRoundSurvivalLootFindBonus;
+				}
 				char pct[4];
 				Format(pct, sizeof(pct), "%");
 				//RoundExperienceMultiplier[i] += FinSurvBon;
-				if (b_IsRescueVehicleArrived) fExperienceBonus += FinSurvBon;
+				if (b_IsRescueVehicleArrived) {
+					fExperienceBonus += FinSurvBon;
+					fLootBonus = fFinaleSurvivalLootFindBonus;
+				}
 
 				for (int i = 1; i <= MaxClients; i++) {
 					if (IsLegitimateClient(i)) {
@@ -123,15 +133,23 @@ stock CallRoundIsOver() {
 						if (RoundExperienceMultiplier[i] < 0.0) RoundExperienceMultiplier[i] = 0.0;
 						if (fExperienceBonus > 0.0) {
 							float scoreMult = GetScoreMultiplier(i);
+							float lootMult = scoreMult;
 							if (scoreMult > 0.0) {
 								scoreMult *= fExperienceBonus;
+								lootMult *= fLootBonus;
 								RoundExperienceMultiplier[i] += scoreMult;
+								clientLootFindBonus[i] += lootMult;
 								PrintToChat(i, "%T", "living survivors experience bonus", i, orange, blue, orange, white, blue, scoreMult * 100.0, white, pct, orange);
+								PrintToChat(i, "%T", "living survivors loot find bonus", i, orange, blue, green, lootMult * 100.0, white, pct);
 								if (bHasDonorPrivileges[i] && fDonatorSurvBonIncrease > 0.0) {
 									// donators receive a survival xp bonus to speed up their potential xp earnings.
 									scoreMult *= fDonatorSurvBonIncrease;
+									lootMult *= fDonatorLootBonusIncrease;
+
 									RoundExperienceMultiplier[i] += scoreMult;
+									clientLootFindBonus[i] += lootMult;
 									PrintToChat(i, "%T", "living survivors experience bonus (donator)", i, orange, blue, orange, white, blue, scoreMult * 100.0, white, pct, orange);
+									PrintToChat(i, "%T", "living survivors loot find bonus (donator)", i, orange, blue, green, lootMult * 100.0, white, pct);
 								}
 							}
 						}

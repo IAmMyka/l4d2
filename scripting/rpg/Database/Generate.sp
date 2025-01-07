@@ -77,6 +77,8 @@ public void DBConnect(Handle owner, Handle hndl, const char[] error, any data)
 		SQL_TQuery(hDatabase, QueryResults, tquery);
 		Format(tquery, sizeof(tquery), "ALTER TABLE `%s` ADD `rem` varchar(32) NOT NULL DEFAULT '0.0';", TheDBPrefix);
 		SQL_TQuery(hDatabase, QueryResults, tquery);
+		Format(tquery, sizeof(tquery), "ALTER TABLE `%s` ADD `lootmult` varchar(32) NOT NULL DEFAULT '0.0';", TheDBPrefix);
+		SQL_TQuery(hDatabase, QueryResults, tquery);
 		Format(tquery, sizeof(tquery), "ALTER TABLE `%s` ADD `%s` int(32) NOT NULL DEFAULT '0';", TheDBPrefix, COOPRECORD_DB);
 		SQL_TQuery(hDatabase, QueryResults, tquery);
 		Format(tquery, sizeof(tquery), "ALTER TABLE `%s` ADD `%s` int(32) NOT NULL DEFAULT '0';", TheDBPrefix, SURVRECORD_DB);

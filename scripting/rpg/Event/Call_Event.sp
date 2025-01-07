@@ -125,9 +125,11 @@ public Call_Event(Handle event, char[] event_name, bool dontBroadcast, pos) {
 			int oldrating = GetArrayCell(tempStorage, victim, 0);
 			int oldhandicap = GetArrayCell(tempStorage, victim, 1);
 			float oldmultiplier = GetArrayCell(tempStorage, victim, 2);
+			float oldLootFind = GetArrayCell(tempStorage, victim, 3);
 			Rating[victim] = oldrating;
 			handicapLevel[victim] = oldhandicap;
 			RoundExperienceMultiplier[victim] = oldmultiplier;
+			clientLootFindBonus[victim] = oldLootFind;
 			playerRespawnCounter[victim] = 0;
 			PrintToChatAll("%t", "rise again", white, orange, white);
 		}

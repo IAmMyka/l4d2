@@ -117,7 +117,11 @@ stock int GenerateAugment(int client, int spawnTarget) {
 	if (handicapLevel[client] > 0) {
 		lootFindBonus = GetArrayCell(HandicapSelectedValues[client], 2);
 	}
-	int potentialItemRating = GetRandomInt(min, max+lootFindBonus);
+	int maxPotentialItemRoll = max+lootFindBonus;
+	if (clientLootFindBonus[client] > 0.0) {
+		maxPotentialItemRoll += RoundToCeil(clientLootFindBonus[client] * maxPotentialItemRoll);
+	}
+	int potentialItemRating = GetRandomInt(min, maxPotentialItemRoll);
 	int trueDismantleScore = iplayerSettingAutoDismantleScore[client] * iAugmentLevelDivisor;
 	if (potentialItemRating < trueDismantleScore) {
 		// we give the player augment parts instead because they don't want this item.
