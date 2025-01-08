@@ -1211,6 +1211,8 @@ public void QueryResults_Load(Handle owner, Handle hndl, const char[] error, any
 			// maybe set a value equal to the users steamid integer only, so if steam:0:1:23456, set the value of "client" equal to 23456 and then set the client equal to whatever client's steamid contains 23456?
 			SQL_TQuery(hDatabase, QueryResults_LoadWeaponExperience, tquery, client);
 
+			iNumEquippedAugments[client] = 0;
+			bIsLoadingCustomProfile[client] = false;
 			Format(tquery, sizeof(tquery), "SELECT `steam_id`, `itemid`, `rating`, `category`, `price`, `isforsale`, `isequipped`, `acteffects`, `actrating`, `tareffects`, `tarrating`, `firstowner`, `firstownername`, `maxscoreroll`, `maxactroll`, `maxtarroll` FROM `%s_loot` WHERE (`steam_id` = '%s');", TheDBPrefix, key);
 			SQL_TQuery(hDatabase, QueryResults_LoadAugments, tquery, client);
 
@@ -1583,7 +1585,7 @@ public void QueryResults_LoadAugments(Handle owner, Handle hndl, const char[] er
 		char text[512];
 		char key[64];
 
-		if (client == -1 || !IsLegitimateClient(client) || IsLegitimateClient(client) && myCurrentTeam[client] != TEAM_SURVIVOR && IsFakeClient(client)) return;
+		if (client == -1 || !IsLegitimateClient(client)) return;// || IsLegitimateClient(client) && myCurrentTeam[client] != TEAM_SURVIVOR && IsFakeClient(client)) return;
 		char loadingClientSteamID[64];
 		GetClientAuthId(client, AuthId_Steam2, loadingClientSteamID, sizeof(loadingClientSteamID));
 		if (!bIsLoadingCustomProfile[client]) {
@@ -1596,107 +1598,73 @@ public void QueryResults_LoadAugments(Handle owner, Handle hndl, const char[] er
 		while (SQL_FetchRow(hndl)) {
 			SQL_FetchString(hndl, 0, key, sizeof(key));
 			ReplaceString(key, sizeof(key), serverKey, "", true);
-			if (!bIsLoadingCustomProfile[client]) {
-				int size = GetArraySize(myAugmentIDCodes[client]);
-				ResizeArray(myAugmentIDCodes[client], size+1);
-				ResizeArray(myAugmentCategories[client], size+1);
-				ResizeArray(myAugmentOwners[client], size+1);
-				ResizeArray(myAugmentOwnersName[client], size+1);
-				ResizeArray(myAugmentInfo[client], size+1);
-				ResizeArray(myAugmentTargetEffects[client], size+1);
-				ResizeArray(myAugmentActivatorEffects[client], size+1);
-				ResizeArray(myAugmentSavedProfiles[client], size+1);
 
-				char itemCode[64];
-				SQL_FetchString(hndl, 1, itemCode, 64);
-				SetArrayString(myAugmentIDCodes[client], size, itemCode);
-				int itemRating = SQL_FetchInt(hndl, 2);
-				SetArrayCell(myAugmentInfo[client], size, itemRating);
-				SQL_FetchString(hndl, 3, text, sizeof(text));
-				SetArrayString(myAugmentCategories[client], size, text);
-				int itemCost = SQL_FetchInt(hndl, 4);
-				SetArrayCell(myAugmentInfo[client], size, itemCost, 1);
-				SetArrayCell(myAugmentInfo[client], size, SQL_FetchInt(hndl, 5), 2);
-				int isEquipped = SQL_FetchInt(hndl, 6);
-				SetArrayCell(myAugmentInfo[client], size, isEquipped, 3);
-				char activatorEffects[64];
-				SQL_FetchString(hndl, 7, activatorEffects, 64);
-				int activatorEffectRating = SQL_FetchInt(hndl, 8);
-				SetArrayCell(myAugmentInfo[client], size, activatorEffectRating, 4);
-				SetArrayString(myAugmentActivatorEffects[client], size, activatorEffects);
+			int size = GetArraySize(myAugmentIDCodes[client]);
+			ResizeArray(myAugmentIDCodes[client], size+1);
+			ResizeArray(myAugmentCategories[client], size+1);
+			ResizeArray(myAugmentOwners[client], size+1);
+			ResizeArray(myAugmentOwnersName[client], size+1);
+			ResizeArray(myAugmentInfo[client], size+1);
+			ResizeArray(myAugmentTargetEffects[client], size+1);
+			ResizeArray(myAugmentActivatorEffects[client], size+1);
+			ResizeArray(myAugmentSavedProfiles[client], size+1);
 
-				char targetEffects[64];
-				SQL_FetchString(hndl, 9, targetEffects, 64);
-				int targetEffectRating = SQL_FetchInt(hndl, 10);
-				char ownerSteamID[64];
-				SQL_FetchString(hndl, 11, ownerSteamID, sizeof(ownerSteamID));
-				if (StrEqual(ownerSteamID, "none")) {
-					Format(ownerSteamID, sizeof(ownerSteamID), "%s", key);
-				}
-				char ownerName[64];
-				SQL_FetchString(hndl, 12, ownerName, sizeof(ownerName));
-				if (StrEqual(ownerName, "none")) {
-					Format(ownerName, sizeof(ownerName), "%s", baseName[client]);
-				}
-				SetArrayString(myAugmentOwners[client], size, ownerSteamID);
-				SetArrayString(myAugmentOwnersName[client], size, ownerName);
+			char itemCode[64];
+			SQL_FetchString(hndl, 1, itemCode, 64);
+			SetArrayString(myAugmentIDCodes[client], size, itemCode);
+			int itemRating = SQL_FetchInt(hndl, 2);
+			SetArrayCell(myAugmentInfo[client], size, itemRating);
+			SQL_FetchString(hndl, 3, text, sizeof(text));
+			SetArrayString(myAugmentCategories[client], size, text);
+			int itemCost = SQL_FetchInt(hndl, 4);
+			SetArrayCell(myAugmentInfo[client], size, itemCost, 1);
+			SetArrayCell(myAugmentInfo[client], size, SQL_FetchInt(hndl, 5), 2);
+			int isEquipped = SQL_FetchInt(hndl, 6);
+			SetArrayCell(myAugmentInfo[client], size, isEquipped, 3);
+			char activatorEffects[64];
+			SQL_FetchString(hndl, 7, activatorEffects, 64);
+			int activatorEffectRating = SQL_FetchInt(hndl, 8);
+			SetArrayCell(myAugmentInfo[client], size, activatorEffectRating, 4);
+			SetArrayString(myAugmentActivatorEffects[client], size, activatorEffects);
 
-
-
-				SetArrayCell(myAugmentInfo[client], size, targetEffectRating, 5);
-				SetArrayString(myAugmentTargetEffects[client], size, targetEffects);
-
-				int maxCategoryScoreRoll = SQL_FetchInt(hndl, 13);
-				SetArrayCell(myAugmentInfo[client], size, maxCategoryScoreRoll, 6);
-				int maxActivatorScoreRoll = SQL_FetchInt(hndl, 14);
-				SetArrayCell(myAugmentInfo[client], size, maxActivatorScoreRoll, 7);
-				int maxTargetScoreRoll = SQL_FetchInt(hndl, 15);
-				SetArrayCell(myAugmentInfo[client], size, maxTargetScoreRoll, 8);
-
-				if (isEquipped >= 0) {
-					SetArrayString(equippedAugmentsIDCodes[client], isEquipped, itemCode);
-					SetArrayCell(equippedAugments[client], isEquipped, itemCost, 1);
-					SetArrayCell(equippedAugments[client], isEquipped, itemRating, 2);
-					SetArrayString(equippedAugmentsCategory[client], isEquipped, text);
-
-					SetArrayString(equippedAugmentsActivator[client], isEquipped, activatorEffects);
-					SetArrayCell(equippedAugments[client], isEquipped, activatorEffectRating, 4);
-
-					SetArrayString(equippedAugmentsTarget[client], isEquipped, targetEffects);
-					SetArrayCell(equippedAugments[client], isEquipped, targetEffectRating, 5);
-				}
+			char targetEffects[64];
+			SQL_FetchString(hndl, 9, targetEffects, 64);
+			int targetEffectRating = SQL_FetchInt(hndl, 10);
+			char ownerSteamID[64];
+			SQL_FetchString(hndl, 11, ownerSteamID, sizeof(ownerSteamID));
+			if (StrEqual(ownerSteamID, "none")) {
+				Format(ownerSteamID, sizeof(ownerSteamID), "%s", key);
 			}
-			else {
-				// only bots and the owner of the augment can load the augments on a profile.
-				// this feature finally enables bots to use the augments associated with a saved profile.
-				if (!IsFakeClient(client) && StrContains(key, loadingClientSteamID) == -1) {
-					LogMessage("%N's %s is not the owner of this profile (%s) so they will not load the augments associated with it.", client, loadingClientSteamID, key);
-					bIsLoadingCustomProfile[client] = false;
-					Format(customProfileKey[client], sizeof(customProfileKey[]), "none");
-					LoadedClientActions(client);
-					return;
-				}
-				// A custom profile is being loaded - the client already has their augments loaded since a custom profile CANNOT be loaded until after a client has loaded.
-				// So here instead we're going to do a new SQL call to set the augments that should be equipped for this profile.
-				// only load the augments for the profile if the client loading the profile is the person who created the profile.
-				// otherwise two players can have the same augments equipped even if they don't both own them and it doesn't cause any problems in code but it's a real mind ufck
-				char tquery[512];
-				Format(tquery, sizeof(tquery), "SELECT `augment1`");
-				for (int i = 1; i < iNumAugments; i++) {
-					Format(tquery, sizeof(tquery), "%s, `augment%d`", tquery, i+1);
-				}
-				Format(tquery, sizeof(tquery), "%s FROM `%s_profiles` WHERE (`steam_id` = '%s');", tquery, TheDBPrefix, customProfileKey[client]);
-				SQL_TQuery(hDatabase, QueryResults_LoadProfileAugments, tquery, client);
-				LoadPos[client] = 0;
-				return;
-				// to find all the profiles an augment is loaded in we need a query that does
-				// select steam_id from %s_profiles where steam_id like useridkey and (augment%d = 'augmentid' or augment%d = 'augmentid') etc.
+			char ownerName[64];
+			SQL_FetchString(hndl, 12, ownerName, sizeof(ownerName));
+			if (StrEqual(ownerName, "none")) {
+				Format(ownerName, sizeof(ownerName), "%s", baseName[client]);
+			}
+			SetArrayString(myAugmentOwners[client], size, ownerSteamID);
+			SetArrayString(myAugmentOwnersName[client], size, ownerName);
 
-				// for (int i = 0; i < iNumAugments; i++) {
-				// 	SQL_FetchString(hndl, i+1, text, sizeof(text));
-				// 	SetArrayString(ActionBar[client], i, text);
-				// 	SetArrayCell(ActionBarMenuPos[client], i, GetMenuPosition(client, text));
-				// }
+			SetArrayCell(myAugmentInfo[client], size, targetEffectRating, 5);
+			SetArrayString(myAugmentTargetEffects[client], size, targetEffects);
+
+			int maxCategoryScoreRoll = SQL_FetchInt(hndl, 13);
+			SetArrayCell(myAugmentInfo[client], size, maxCategoryScoreRoll, 6);
+			int maxActivatorScoreRoll = SQL_FetchInt(hndl, 14);
+			SetArrayCell(myAugmentInfo[client], size, maxActivatorScoreRoll, 7);
+			int maxTargetScoreRoll = SQL_FetchInt(hndl, 15);
+			SetArrayCell(myAugmentInfo[client], size, maxTargetScoreRoll, 8);
+
+			if (isEquipped >= 0) {
+				iNumEquippedAugments[client]++;
+				SetArrayString(equippedAugmentsIDCodes[client], isEquipped, itemCode);
+				SetArrayCell(equippedAugments[client], isEquipped, itemCost, 1);
+				SetArrayCell(equippedAugments[client], isEquipped, itemRating, 2);
+				SetArrayString(equippedAugmentsCategory[client], isEquipped, text);
+
+				SetArrayString(equippedAugmentsActivator[client], isEquipped, activatorEffects);
+				SetArrayCell(equippedAugments[client], isEquipped, activatorEffectRating, 4);
+
+				SetArrayString(equippedAugmentsTarget[client], isEquipped, targetEffects);
+				SetArrayCell(equippedAugments[client], isEquipped, targetEffectRating, 5);
 			}
 			
 			//client = FindClientWithAuthString(key);

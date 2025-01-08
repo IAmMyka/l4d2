@@ -111,6 +111,7 @@ public ReadyUp_CheckpointDoorStartOpened() {
 			}
 			if (!AnyBotsOnSurvivorTeam && fSurvivorBotsNoneBonus > 0.0 && survivorCounter <= iSurvivorBotsBonusLimit) PrintToChat(i, "%T", "group no survivor bots bonus", i, blue, fSurvivorBotsNoneBonus * 100.0, pct, green, orange);
 			if (RoundExperienceMultiplier[i] > 0.0) PrintToChat(i, "%T", "survivalist bonus experience", i, blue, orange, green, RoundExperienceMultiplier[i] * 100.0, white, pct);
+			if (clientLootFindBonus[i] > 0.0) PrintToChat(i, "%T", "survivalist loot find bonus", i, orange, blue, green, clientLootFindBonus[i] * 100.0, white, pct);
 		}
 		CheckDifficulty();
 		RoundTime					=	GetTime();

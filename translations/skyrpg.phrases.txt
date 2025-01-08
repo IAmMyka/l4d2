@@ -3,15 +3,20 @@
 
 "Phrases"
 {
+	"survivalist loot find bonus"
+	{
+		"#format"			"{1:s},{2:s},{3:s},{4:3.1f},{5:s},{6:s}"
+		"en"				"{1}Current Loot Find Bonus{2}: {3}{4}{5}{6}"
+	}
 	"living survivors loot find bonus"
 	{
-		"#format"			"{1:s},{2:s},{3:s},{4:3.3f},{5:s},{6:s}"
-		"en"				"{1}Loot Find Bonus {2}+{3}{4}{5}{6}"
+		"#format"			"{1:s},{2:s},{3:s},{4:3.1f},{5:s},{6:s}"
+		"en"				"{1}Loot Find Bonus increases by {2}+{3}{4}{5}{6}"
 	}
 	"living survivors loot find bonus (donator)"
 	{
-		"#format"			"{1:s},{2:s},{3:s},{4:3.3f},{5:s},{6:s}"
-		"en"				"{1}Loot Find Bonus (donator) {2}+{3}{4}{5}{6}"
+		"#format"			"{1:s},{2:s},{3:s},{4:3.1f},{5:s},{6:s}"
+		"en"				"{1}Loot Find Bonus increases by (donator) {2}+{3}{4}{5}{6}"
 	}
 	"stuck time required remaining for teleport"
 	{
@@ -935,9 +940,17 @@
 	{
 		"en"				"Effect Settings\nAdjust screen shake frequency and intensity."
 	}
+	"loot inventory main"
+	{
+		"en"				"Loot Inventory (items held: {INVLIMIT})"
+	}
+	"view equipped loot"
+	{
+		"en"				"Equipped Gear ({EQUIPPED})"
+	}
 	"view loot"
 	{
-		"en"				"Gear (items held: {INVLIMIT})"
+		"en"				"Browse Inventory ({INVLIMIT})"
 	}
 	"view augment inventory"
 	{

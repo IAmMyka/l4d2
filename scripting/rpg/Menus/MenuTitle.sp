@@ -31,7 +31,7 @@ stock void BuildMenuTitle(int client, Handle menu, int bot = 0, int type = 0, bo
 				MenuExperienceBar(client, _, _, text, sizeof(text));
 				int clientInventoryLimit = iInventoryLimit;
 				if (bHasDonorPrivileges[client]) clientInventoryLimit += iDonorInventoryIncrease;
-				Format(text, sizeof(text), "%T", "Player Level Text", client, PlayerLevel[client], iMaxLevel, currExperience, text, targExperience, ratingFormatted, scrap, avgAugLvl, GetArraySize(myAugmentIDCodes[client]), clientInventoryLimit, TotalPoints, maximumPlayerUpgradesToShow, UpgradesAvailable[client] + FreeUpgrades[client], SkyPoints[client]);
+				Format(text, sizeof(text), "%T", "Player Level Text", client, PlayerLevel[client], iMaxLevel, currExperience, text, targExperience, ratingFormatted, scrap, avgAugLvl, GetArraySize(myAugmentIDCodes[client])-iNumEquippedAugments[client], clientInventoryLimit, TotalPoints, maximumPlayerUpgradesToShow, UpgradesAvailable[client] + FreeUpgrades[client], SkyPoints[client]);
 				if (SkyLevel[client] > 0) Format(text, sizeof(text), "%T", "Prestige Level Text", client, SkyLevel[client], iSkyLevelMax, text);
 			}
 			if (CheckRPGMode != 0) {

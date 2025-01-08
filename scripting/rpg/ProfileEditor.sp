@@ -462,6 +462,8 @@ public void QueryResults_LoadTalentTreesEx(Handle owner, Handle hndl, const char
 	if (!IsLegitimateClient(client)) return;
 	int dbsize = GetArraySize(a_Menu_Talents);
 	if (GetArraySize(a_Database_PlayerTalents[client]) != dbsize) ResizeArray(a_Database_PlayerTalents[client], dbsize);
+	char loadingClientSteamID[64];
+	GetClientAuthId(client, AuthId_Steam2, loadingClientSteamID, sizeof(loadingClientSteamID));
 	while (SQL_FetchRow(hndl)) {
 		SQL_FetchString(hndl, 0, key, sizeof(key));
 		if (LoadPos[client] >= 0 && LoadPos[client] < dbsize) {
@@ -504,6 +506,25 @@ public void QueryResults_LoadTalentTreesEx(Handle owner, Handle hndl, const char
 				Format(tquery, sizeof(tquery), "%s, `disab`, `primarywep`, `secondwep`", tquery);
 				Format(tquery, sizeof(tquery), "%s FROM `%s_profiles` WHERE (`steam_id` = '%s');", tquery, TheDBPrefix, key);
 				SQL_TQuery(hDatabase, QueryResults_LoadActionBar, tquery, client);
+
+				iNumEquippedAugments[client] = 0;
+				if (!IsFakeClient(client) && StrContains(key, loadingClientSteamID) == -1) {
+					LogMessage("%N's %s is not the owner of this profile (%s) so they will not load the augments associated with it.", client, loadingClientSteamID, key);
+					bIsLoadingCustomProfile[client] = false;
+					Format(customProfileKey[client], sizeof(customProfileKey[]), "none");
+					LoadedClientActions(client);
+					return;
+				}
+				// A custom profile is being loaded - the client already has their augments loaded since a custom profile CANNOT be loaded until after a client has loaded.
+				// So here instead we're going to do a new SQL call to set the augments that should be equipped for this profile.
+				// only load the augments for the profile if the client loading the profile is the person who created the profile.
+				// otherwise two players can have the same augments equipped even if they don't both own them and it doesn't cause any problems in code but it's a real mind ufck
+				Format(tquery, sizeof(tquery), "SELECT `augment1`");
+				for (int i = 1; i < iNumAugments; i++) {
+					Format(tquery, sizeof(tquery), "%s, `augment%d`", tquery, i+1);
+				}
+				Format(tquery, sizeof(tquery), "%s FROM `%s_profiles` WHERE (`steam_id` = '%s');", tquery, TheDBPrefix, key);
+				SQL_TQuery(hDatabase, QueryResults_LoadProfileAugments, tquery, client);
 				LoadPos[client] = 0;
 				return;
 			}

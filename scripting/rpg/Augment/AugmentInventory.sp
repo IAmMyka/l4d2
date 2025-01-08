@@ -31,6 +31,19 @@ public int GetAugmentPos(client, char[] itemCode) {
 
 public Handle Augments_Equip(client) {
 	Handle menu = CreatePanel();
+
+	char augmentName[64];
+	char augmentCategory[64];
+	char augmentActivator[128];
+	char augmentTarget[128];
+
+	GetAugmentComparator(client, AugmentClientIsInspecting[client], augmentName, augmentCategory, augmentActivator, augmentTarget);
+	Format(augmentName, sizeof(augmentName), "Inspecting %s", augmentName);
+	DrawPanelText(menu, augmentName);
+	DrawPanelText(menu, augmentCategory);
+	if (!StrEqual(augmentActivator, "-1")) DrawPanelText(menu, augmentActivator);
+	if (!StrEqual(augmentTarget, "-1")) DrawPanelText(menu, augmentTarget);
+	DrawPanelText(menu, "\n \nEQUIPPED GEAR LIST");
 	char text[512];
 	char pct[4];
 	Format(pct, 4, "%");
@@ -43,53 +56,44 @@ public Handle Augments_Equip(client) {
 	if (GetArraySize(equippedAugmentsCategory[client]) != iNumAugments) ResizeArray(equippedAugmentsCategory[client], iNumAugments);
 	if (GetArraySize(equippedAugmentsActivator[client]) != iNumAugments) ResizeArray(equippedAugmentsActivator[client], iNumAugments);
 	if (GetArraySize(equippedAugmentsTarget[client]) != iNumAugments) ResizeArray(equippedAugmentsTarget[client], iNumAugments);
-	for (int i = 0; i < iNumAugments; i++) {
-		GetArrayString(equippedAugmentsCategory[client], i, baseMenuText, 64);
-		int len = GetAugmentTranslation(client, baseMenuText, menuText);
-		GetArrayString(equippedAugmentsIDCodes[client], i, itemCode, 64);
-		int augmentPos = GetAugmentPos(client, itemCode);
-		if (len == -1 || augmentPos == -1) {
-			SetArrayCell(equippedAugments[client], i, 0);
-			SetArrayCell(equippedAugments[client], i, 0, 4);
-			SetArrayCell(equippedAugments[client], i, 0, 5);
-			DrawPanelItem(menu, "<empty>");
+
+	ClearArray(augmentInventoryPosition[client]);
+	int currentAugment = 0;
+	int size = GetArraySize(myAugmentInfo[client]);
+	while (currentAugment < iNumAugments) {
+		if (GetArrayCell(equippedAugments[client], currentAugment, 2) < 1) {
+			char empty[64];
+			Format(empty, sizeof(empty), "<slot %d is empty>", currentAugment+1);
+			DrawPanelItem(menu, empty);
+			currentAugment++;
 			continue;
 		}
-		char augmentName[64], augmentCategory[64], augmentActivator[64], augmentTarget[64];
-		GetAugmentComparator(client, i, augmentName, augmentCategory, augmentActivator, augmentTarget, _, true);
-		char augmentCatStr[64], augmentActStr[64], augmentTarStr[64];
-		char augmentTitle[64];
-		GetAugmentStrength(client, i, 0, augmentCatStr);
-		GetAugmentStrength(client, i, 1, augmentActStr);
-		GetAugmentStrength(client, i, 2, augmentTarStr);
-		Format(augmentTitle, sizeof(augmentTitle), "%s %s %s", augmentName, augmentCatStr, augmentCategory);
-		Format(text, sizeof(text), "%s", augmentTitle);
-		if (!StrEqual(augmentActivator, "-1")) {
-			Format(augmentActStr, sizeof(augmentActStr), "%s %s", augmentActStr, augmentActivator);
-			Format(text, sizeof(text), "%s\n%s", text, augmentActStr);
+		for (int i = 0; i < size; i++) {
+			int isEquipped = GetArrayCell(myAugmentInfo[client], i, 3);
+			if (isEquipped != currentAugment) continue;
+			PushArrayCell(augmentInventoryPosition[client], i);
+
+			//char augmentName[64], augmentCategory[64], augmentActivator[64], augmentTarget[64];
+			GetAugmentComparator(client, i, augmentName, augmentCategory, augmentActivator, augmentTarget, _, true);
+			char augmentCatStr[64], augmentActStr[64], augmentTarStr[64];
+			char augmentTitle[64];
+			GetAugmentStrength(client, i, 0, augmentCatStr);
+			GetAugmentStrength(client, i, 1, augmentActStr);
+			GetAugmentStrength(client, i, 2, augmentTarStr);
+			if (strlen(augmentName) > 1) Format(augmentTitle, sizeof(augmentTitle), "%s %s %s", augmentName, augmentCatStr, augmentCategory);
+			else Format(augmentTitle, sizeof(augmentTitle), "%s %s", augmentCatStr, augmentCategory);
+			Format(text, sizeof(text), "%s", augmentTitle);
+			if (!StrEqual(augmentActivator, "-1")) {
+				Format(augmentActStr, sizeof(augmentActStr), "%s %s", augmentActStr, augmentActivator);
+				Format(text, sizeof(text), "%s\n%s", text, augmentActStr);
+			}
+			if (!StrEqual(augmentTarget, "-1")) {
+				Format(augmentTarStr, sizeof(augmentTarStr), "%s %s", augmentTarStr, augmentTarget);
+				Format(text, sizeof(text), "%s\n%s", text, augmentTarStr);
+			}
+			DrawPanelItem(menu, text);
 		}
-		if (!StrEqual(augmentTarget, "-1")) {
-			Format(augmentTarStr, sizeof(augmentTarStr), "%s %s", augmentTarStr, augmentTarget);
-			Format(text, sizeof(text), "%s\n%s", text, augmentTarStr);
-		}
-
-
-		// GetArrayString(equippedAugmentsActivator[client], i, activatorText, 64);
-		// GetArrayString(equippedAugmentsTarget[client], i, targetText, 64);
-		// Format(menuText, 64, "%T", menuText, client);
-		// int iItemLevel = GetArrayCell(equippedAugments[client], i, 2);
-
-		// int activatorRating = GetArrayCell(equippedAugments[client], i, 4);
-		// int targetRating = GetArrayCell(equippedAugments[client], i, 5);
-		
-		// GetAugmentSurname(client, augmentPos, activatorText, 64, targetText, 64);
-		// if (activatorRating < 1 && targetRating < 1) Format(itemStr, 64, "Minor");
-		// else if (activatorRating > 0 && targetRating > 0) Format(itemStr, 64, "Perfect %s %s", activatorText, targetText);
-		// else if (activatorRating > 0) Format(itemStr, 64, "Major %s", activatorText);
-		// else Format(itemStr, 64, "Major %s", targetText);
-
-		// Format(text, sizeof(text), "+%3.1f%s %s %s %s", (iItemLevel * fAugmentRatingMultiplier) * 100.0, pct, itemStr, menuText, baseMenuText[len]);
-		DrawPanelItem(menu, text);
+		currentAugment++;
 	}
 	
 	Format(text, sizeof(text), "%T", "return to talent menu", client);
@@ -262,13 +266,26 @@ stock EquipAugment_Confirm(int client, int pos, int augmentInspectionOverride = 
 	SetArrayCell(equippedAugments[client], pos, activatorRating, 4);
 	SetArrayString(equippedAugmentsTarget[client], pos, targetText);
 	SetArrayCell(equippedAugments[client], pos, targetRating, 5);
+	// calculate how many augments are equipped and store the value for the menu UI.
+	iNumEquippedAugments[client] = 0;
+	int currentAugment = 0;
+	while (currentAugment < iNumAugments) {
+		if (GetArrayCell(equippedAugments[client], currentAugment, 2) > 0) iNumEquippedAugments[client]++;
+		currentAugment++;
+	}
 	SetClientTalentStrength(client);	// talent strengths need to be updated when an augment is equipped or unequipped.
 	FormatPlayerName(client);
 }
 
-stock void GetAugmentSurname(int client, int pos, char[] surname, int surnameSize, char[] surname2, int surname2Size, bool bFormatTranslation = true) {
-	GetArrayString(myAugmentActivatorEffects[client], pos, surname, surnameSize);
-	GetArrayString(myAugmentTargetEffects[client], pos, surname2, surname2Size);
+stock void GetAugmentSurname(int client, int pos, char[] surname, int surnameSize, char[] surname2, int surname2Size, bool bFormatTranslation = true, bool isAugmentEquipped = false) {
+	if (!isAugmentEquipped) {
+		GetArrayString(myAugmentActivatorEffects[client], pos, surname, surnameSize);
+		GetArrayString(myAugmentTargetEffects[client], pos, surname2, surname2Size);
+	}
+	else {
+		GetArrayString(equippedAugmentsActivator[client], pos, surname, surnameSize);
+		GetArrayString(equippedAugmentsTarget[client], pos, surname2, surname2Size);
+	}
 	bool surname1IsEmpty = (StrEqual(surname, "-1")) ? true : false;
 	bool surname2IsEmpty = (StrEqual(surname2, "-1")) ? true : false;
 	if (!surname1IsEmpty && !surname2IsEmpty) {
@@ -466,6 +483,7 @@ public Inspect_Augment_Handle (Handle topmenu, MenuAction action, client, param2
 
 			SetArrayString(equippedAugmentsTarget[client], isEquipped, "");
 			SetArrayCell(equippedAugments[client], isEquipped, -1, 5);
+			iNumEquippedAugments[client]--;
 			SetClientTalentStrength(client);	// talent strengths need to be updated when an augment is equipped or unequipped.
 			FormatPlayerName(client);
 
@@ -506,7 +524,10 @@ public Inspect_Augment_Handle (Handle topmenu, MenuAction action, client, param2
 			else SetArrayCell(myAugmentInfo[client], AugmentClientIsInspecting[client], -3, 3);
 			SendPanelToClientAndClose(Inspect_Augment(client, AugmentClientIsInspecting[client]), client, Inspect_Augment_Handle, MENU_TIME_FOREVER);
 		}
-		else if (StrEqual(menuSelection, "return")) Augments_Inventory(client);
+		else if (StrEqual(menuSelection, "return")) {
+			if (isEquipped >= 0) Augments_Inventory(client);
+			else Augments_Inventory(client, false);
+		}
 	}
 }
 
@@ -844,7 +865,7 @@ public Upgrade_Augment_Handle (Handle topmenu, MenuAction action, client, param2
 	}
 }
 
-stock Augments_Inventory(client) {
+stock Augments_Inventory(int client, bool showEquippedGears = true) {
 	itemToDisassemble[client] = -1;
 	Handle menu = CreateMenu(Augments_Inventory_Handle);
 	char pct[4];
@@ -853,7 +874,8 @@ stock Augments_Inventory(client) {
 	char text[512];
 	int clientInventoryLimit = iInventoryLimit;
 	if (bHasDonorPrivileges[client]) clientInventoryLimit += iDonorInventoryIncrease;
-	Format(text, 512, "Inventory limit:\t%d/%d\nMaterials:\t%d", size, clientInventoryLimit, augmentParts[client]);
+	if (showEquippedGears) Format(text, 512, "EQUIPPED GEAR LIST\n \nMaterials:\t%d", augmentParts[client]);
+	else Format(text, 512, "Inventory limit:\t%d/%d\nMaterials:\t%d", size-iNumEquippedAugments[client], clientInventoryLimit, augmentParts[client]);
 	SetMenuTitle(menu, text);
 	//SortADTArray(myAugmentInfo[client], Sort_Ascending, Sort_Integer);
 	if (size > 0) {
@@ -862,11 +884,65 @@ stock Augments_Inventory(client) {
 
 		ClearArray(augmentInventoryPosition[client]);
 		// show equipped augments, in order, first.
-		int currentAugment = 0;
-		while (currentAugment < iNumAugments) {
+		if (showEquippedGears) {
+			int currentAugment = 0;
+			while (currentAugment < iNumAugments) {
+				if (GetArrayCell(equippedAugments[client], currentAugment, 2) < 1) {
+					char empty[64];
+					Format(empty, sizeof(empty), "<slot %d is empty>", currentAugment+1);
+					PushArrayCell(augmentInventoryPosition[client], -1);
+					AddMenuItem(menu, empty, empty);
+					currentAugment++;
+					continue;
+				}
+				for (int i = 0; i < size; i++) {
+					int isEquipped = GetArrayCell(myAugmentInfo[client], i, 3);
+					if (isEquipped != currentAugment) continue;
+					// I'm using an arraylist to store which position of the inventory to actually load, so that I can
+					// show players their equipped augments, ordered, before all other augments.
+					//int currentPositionsStored = GetArraySize(augmentInventoryPosition[client]);
+					//ResizeArray(augmentInventoryPosition[client], currentPositionsStored + 1);
+					PushArrayCell(augmentInventoryPosition[client], i);
+
+					char augmentName[64], augmentCategory[64], augmentActivator[64], augmentTarget[64];
+					GetAugmentComparator(client, i, augmentName, augmentCategory, augmentActivator, augmentTarget, _, true);
+					char augmentCatStr[64], augmentActStr[64], augmentTarStr[64];
+					char augmentTitle[64];
+					GetAugmentStrength(client, i, 0, augmentCatStr);
+					GetAugmentStrength(client, i, 1, augmentActStr);
+					GetAugmentStrength(client, i, 2, augmentTarStr);
+					Format(augmentTitle, sizeof(augmentTitle), "%s %s %s (%d)", augmentName, augmentCatStr, augmentCategory, isEquipped+1);
+					char augmentOwner[64];
+					GetArrayString(myAugmentOwners[client], i, augmentOwner, sizeof(augmentOwner));
+					
+					bool isNotOriginalOwner = (StrContains(augmentOwner, key, false) == -1) ? true : false;
+					if (isNotOriginalOwner) Format(augmentTitle, sizeof(augmentTitle), "%s^", augmentTitle);
+
+					char profilesSavedTo[64];
+					GetArrayString(myAugmentSavedProfiles[client], i, profilesSavedTo, sizeof(profilesSavedTo));
+					if (!StrEqual(profilesSavedTo, "none")) Format(augmentTitle, sizeof(augmentTitle), "%s!", augmentTitle);
+
+					Format(text, sizeof(text), "%s", augmentTitle);
+					if (!StrEqual(augmentActivator, "-1")) {
+						Format(augmentActStr, sizeof(augmentActStr), "%s %s", augmentActStr, augmentActivator);
+						Format(text, sizeof(text), "%s\n%s", text, augmentActStr);
+					}
+					if (!StrEqual(augmentTarget, "-1")) {
+						Format(augmentTarStr, sizeof(augmentTarStr), "%s %s", augmentTarStr, augmentTarget);
+						Format(text, sizeof(text), "%s\n%s", text, augmentTarStr);
+					}
+
+					AddMenuItem(menu, text, text);
+					break;
+				}
+				currentAugment++;
+			}
+		}
+		else {
+			// unequipped augments now.
 			for (int i = 0; i < size; i++) {
 				int isEquipped = GetArrayCell(myAugmentInfo[client], i, 3);
-				if (isEquipped != currentAugment) continue;
+				if (isEquipped >= 0) continue;
 				// I'm using an arraylist to store which position of the inventory to actually load, so that I can
 				// show players their equipped augments, ordered, before all other augments.
 				//int currentPositionsStored = GetArraySize(augmentInventoryPosition[client]);
@@ -880,13 +956,15 @@ stock Augments_Inventory(client) {
 				GetAugmentStrength(client, i, 0, augmentCatStr);
 				GetAugmentStrength(client, i, 1, augmentActStr);
 				GetAugmentStrength(client, i, 2, augmentTarStr);
-				Format(augmentTitle, sizeof(augmentTitle), "%s %s %s (%d)", augmentName, augmentCatStr, augmentCategory, isEquipped+1);
+				Format(augmentTitle, sizeof(augmentTitle), "%s %s %s", augmentName, augmentCatStr, augmentCategory);
+				if (isEquipped == -2) Format(augmentTitle, sizeof(augmentTitle), "%s*", augmentTitle);
+				
 				char augmentOwner[64];
 				GetArrayString(myAugmentOwners[client], i, augmentOwner, sizeof(augmentOwner));
 				
 				bool isNotOriginalOwner = (StrContains(augmentOwner, key, false) == -1) ? true : false;
 				if (isNotOriginalOwner) Format(augmentTitle, sizeof(augmentTitle), "%s^", augmentTitle);
-
+				
 				char profilesSavedTo[64];
 				GetArrayString(myAugmentSavedProfiles[client], i, profilesSavedTo, sizeof(profilesSavedTo));
 				if (!StrEqual(profilesSavedTo, "none")) Format(augmentTitle, sizeof(augmentTitle), "%s!", augmentTitle);
@@ -900,52 +978,8 @@ stock Augments_Inventory(client) {
 					Format(augmentTarStr, sizeof(augmentTarStr), "%s %s", augmentTarStr, augmentTarget);
 					Format(text, sizeof(text), "%s\n%s", text, augmentTarStr);
 				}
-
 				AddMenuItem(menu, text, text);
-				break;
 			}
-			currentAugment++;
-		}
-		// unequipped augments now.
-		for (int i = 0; i < size; i++) {
-			int isEquipped = GetArrayCell(myAugmentInfo[client], i, 3);
-			if (isEquipped >= 0) continue;
-			// I'm using an arraylist to store which position of the inventory to actually load, so that I can
-			// show players their equipped augments, ordered, before all other augments.
-			//int currentPositionsStored = GetArraySize(augmentInventoryPosition[client]);
-			//ResizeArray(augmentInventoryPosition[client], currentPositionsStored + 1);
-			PushArrayCell(augmentInventoryPosition[client], i);
-
-			char augmentName[64], augmentCategory[64], augmentActivator[64], augmentTarget[64];
-			GetAugmentComparator(client, i, augmentName, augmentCategory, augmentActivator, augmentTarget, _, true);
-			char augmentCatStr[64], augmentActStr[64], augmentTarStr[64];
-			char augmentTitle[64];
-			GetAugmentStrength(client, i, 0, augmentCatStr);
-			GetAugmentStrength(client, i, 1, augmentActStr);
-			GetAugmentStrength(client, i, 2, augmentTarStr);
-			Format(augmentTitle, sizeof(augmentTitle), "%s %s %s", augmentName, augmentCatStr, augmentCategory);
-			if (isEquipped == -2) Format(augmentTitle, sizeof(augmentTitle), "%s*", augmentTitle);
-			
-			char augmentOwner[64];
-			GetArrayString(myAugmentOwners[client], i, augmentOwner, sizeof(augmentOwner));
-			
-			bool isNotOriginalOwner = (StrContains(augmentOwner, key, false) == -1) ? true : false;
-			if (isNotOriginalOwner) Format(augmentTitle, sizeof(augmentTitle), "%s^", augmentTitle);
-			
-			char profilesSavedTo[64];
-			GetArrayString(myAugmentSavedProfiles[client], i, profilesSavedTo, sizeof(profilesSavedTo));
-			if (!StrEqual(profilesSavedTo, "none")) Format(augmentTitle, sizeof(augmentTitle), "%s!", augmentTitle);
-
-			Format(text, sizeof(text), "%s", augmentTitle);
-			if (!StrEqual(augmentActivator, "-1")) {
-				Format(augmentActStr, sizeof(augmentActStr), "%s %s", augmentActStr, augmentActivator);
-				Format(text, sizeof(text), "%s\n%s", text, augmentActStr);
-			}
-			if (!StrEqual(augmentTarget, "-1")) {
-				Format(augmentTarStr, sizeof(augmentTarStr), "%s %s", augmentTarStr, augmentTarget);
-				Format(text, sizeof(text), "%s\n%s", text, augmentTarStr);
-			}
-			AddMenuItem(menu, text, text);
 		}
 	}
 	SetMenuExitBackButton(menu, true);
@@ -953,7 +987,11 @@ stock Augments_Inventory(client) {
 }
 
 public Augments_Inventory_Handle(Handle menu, MenuAction action, client, slot) {
-	if (action == MenuAction_Select) SendPanelToClientAndClose(Inspect_Augment(client, GetArrayCell(augmentInventoryPosition[client], slot)), client, Inspect_Augment_Handle, MENU_TIME_FOREVER);
+	if (action == MenuAction_Select) {
+		int augmentSlot = GetArrayCell(augmentInventoryPosition[client], slot);
+		if (augmentSlot == -1) Augments_Inventory(client);
+		else SendPanelToClientAndClose(Inspect_Augment(client, augmentSlot), client, Inspect_Augment_Handle, MENU_TIME_FOREVER);
+	}
 	else if (action == MenuAction_Cancel) {
 		if (slot == MenuCancel_ExitBack) BuildMenu(client);
 	}

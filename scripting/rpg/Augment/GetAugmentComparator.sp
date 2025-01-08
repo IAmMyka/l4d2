@@ -40,14 +40,14 @@ stock void GetAugmentComparator(int client, int slot, char[] augmentName, char[]
 	char itemStr[64];
 	char actText[64];
 	char tarText[64];
-	GetAugmentSurname(client, slot, actText, 64, tarText, 64);
+	GetAugmentSurname(client, slot, actText, 64, tarText, 64, _, isAugmentEquipped);
 
-	if (activatorRating < 1 && targetRating < 1) Format(itemStr, 64, "Minor");
-	else if (activatorRating > 0 && targetRating > 0) Format(itemStr, 64, "Perfect %s %s", actText, tarText);
-	else Format(itemStr, 64, "Major %s", actText);
-
-	Format(text, sizeof(text), "%s", itemStr);
-	Format(augmentName, 64, "%s", text);
+	if (activatorRating > 0 || targetRating > 0) {
+		if (activatorRating > 0 && targetRating > 0) Format(itemStr, 64, "%s %s", actText, tarText);
+		else Format(itemStr, 64, "%s", actText);
+		Format(text, sizeof(text), "%s", itemStr);
+		Format(augmentName, 64, "%s", text);
+	}
 	if (justGetTalentName) Format(augmentCategory, 64, "%s %s", menuText, baseMenuText[len]);
 	else {
 		if (!replaceStr) Format(text, sizeof(text), "\n\t+%3.1f%s to %s %s", (iItemLevel * fAugmentRatingMultiplier) * 100.0, pct, menuText, baseMenuText[len]);

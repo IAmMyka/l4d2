@@ -139,10 +139,14 @@ stock bool IsPlayerTryingToPickupLoot(client, bool isLootBag = true, char[] clas
 		return false;
 	}
 
-	int clientInventorySize = GetArraySize(myAugmentIDCodes[clientToReceiveLoot]);
+	int clientInventorySize = GetArraySize(myAugmentIDCodes[clientToReceiveLoot]) - iNumEquippedAugments[clientToReceiveLoot];
 	int clientInventoryLimit = iInventoryLimit;
 	if (bHasDonorPrivileges[clientToReceiveLoot]) clientInventoryLimit += iDonorInventoryIncrease;
-	
+
+	RemoveFromArray(playerLootOnGround[lootOwner], lootBagPosition);	// we remove from the list wherever this bag was - it may not be at the end.
+	RemoveFromArray(playerLootOnGroundId[lootOwner], lootBagPosition);
+	if (isLootBag && IsValidEntityEx(entity)) RemoveEntity(entity);//AcceptEntityInput(entity, "Kill");
+
 	if (clientInventorySize < clientInventoryLimit) {
 		Format(statusMessageToDisplay[clientToReceiveLoot], 64, "Inventory Size %d/%d", clientInventorySize+1, clientInventoryLimit);
 		fStatusMessageDisplayTime[clientToReceiveLoot] = GetEngineTime() + fDisplayLootPickupMessageTime;
@@ -155,9 +159,6 @@ stock bool IsPlayerTryingToPickupLoot(client, bool isLootBag = true, char[] clas
 		fStatusMessageDisplayTime[clientToReceiveLoot] = GetEngineTime() + fDisplayLootPickupMessageTime;
 		return false;
 	}
-	RemoveFromArray(playerLootOnGround[lootOwner], lootBagPosition);	// we remove from the list wherever this bag was - it may not be at the end.
-	RemoveFromArray(playerLootOnGroundId[lootOwner], lootBagPosition);
-	if (isLootBag && IsValidEntityEx(entity)) RemoveEntity(entity);//AcceptEntityInput(entity, "Kill");
 	return true;
 }
 
@@ -266,32 +267,26 @@ stock void PickupAugment(int client, int owner, char[] ownerSteamID = "none", ch
 	}
 	SetArrayCell(myAugmentInfo[client], size, augmentTargetRating, 5);
 	char augmentStrengthText[64];
-	if (augmentActivatorRating == -1 && augmentTargetRating == -1) {
-		Format(augmentStrengthText, 64, "{B}Minor");
-	}
-	else {
+	if (augmentActivatorRating > 0 || augmentTargetRating > 0) {
 		char majorname[64];
 		char perfectname[64];
-		GetAugmentSurname(client, size, majorname, sizeof(majorname), perfectname, sizeof(perfectname), false);
-		if (!StrEqual(majorname, "-1")) Format(majorname, sizeof(majorname), "%t", majorname);
-		if (!StrEqual(perfectname, "-1")) Format(perfectname, sizeof(perfectname), "%t", perfectname);
-		if (!StrEqual(majorname, "-1") && !StrEqual(perfectname, "-1")) Format(augmentStrengthText, 64, "{B}Perfect {O}%s %s", majorname, perfectname);
-		else if (!StrEqual(majorname, "-1")) Format(augmentStrengthText, 64, "{B}Major {O}%s", majorname);
-		else Format(augmentStrengthText, 64, "{B}Major {O}%s", perfectname);
+		GetAugmentSurname(client, size, majorname, sizeof(majorname), perfectname, sizeof(perfectname));
+		if (augmentActivatorRating > 0 && augmentTargetRating > 0) Format(augmentStrengthText, 64, "{O}%s %s", majorname, perfectname);
+		else Format(augmentStrengthText, 64, "{O}%s", majorname);
 	}
 	char text[512];
 	// I need fast...
 	if (lootReason == LOOTREASON_CLIENTISOWNER) {
-		Format(text, sizeof(text), "{B}%s {N}looted a {B}+{OG}%3.1f{O}PCT %s {OG}%s {O}%s {B}gear drop", baseName[clientWhoPickedUpTheAugment], (augmentItemScore * fAugmentRatingMultiplier) * 100.0, augmentStrengthText, menuText, buffedCategory[len]);
+		Format(text, sizeof(text), "{B}%s {N}looted a {O}%s {B}+{OG}%3.1f{O}PCT {OG}%s {O}%s {B}gear drop", baseName[clientWhoPickedUpTheAugment], augmentStrengthText, (augmentItemScore * fAugmentRatingMultiplier) * 100.0, menuText, buffedCategory[len]);
 	}
 	else if (lootReason == LOOTREASON_FORCEDSHARING) {
-		Format(text, sizeof(text), "{B}%s {N}looted {B}%s{N}'s {B}+{OG}%3.1f{O}PCT %s {OG}%s {O}%s {B}gear drop", baseName[clientWhoPickedUpTheAugment], baseName[owner], (augmentItemScore * fAugmentRatingMultiplier) * 100.0, augmentStrengthText, menuText, buffedCategory[len]);
+		Format(text, sizeof(text), "{B}%s {N}looted {B}%s{N}'s {O}%s {B}+{OG}%3.1f{O}PCT {OG}%s {O}%s {B}gear drop", baseName[clientWhoPickedUpTheAugment], baseName[owner], augmentStrengthText, (augmentItemScore * fAugmentRatingMultiplier) * 100.0, menuText, buffedCategory[len]);
 	}
 	else if (lootReason == LOOTREASON_NOTSHARING) {
-		Format(text, sizeof(text), "{B}%s {N}picked up a {B}+{OG}%3.1f{O}PCT %s {OG}%s {O}%s {B}gear drop {N}for {B}%s", baseName[clientWhoPickedUpTheAugment], (augmentItemScore * fAugmentRatingMultiplier) * 100.0, augmentStrengthText, menuText, buffedCategory[len], baseName[owner]);
+		Format(text, sizeof(text), "{B}%s {N}picked up a {O}%s {B}+{OG}%3.1f{O}PCT {OG}%s {O}%s {B}gear drop {N}for {B}%s", baseName[clientWhoPickedUpTheAugment], augmentStrengthText, (augmentItemScore * fAugmentRatingMultiplier) * 100.0, menuText, buffedCategory[len], baseName[owner]);
 	}
 	else if (lootReason == LOOTREASON_CLIENTSTOLELOOT) {
-		Format(text, sizeof(text), "{B}%s {N}stole a {B}+{OG}%3.1f{O}PCT %s {OG}%s {O}%s {B}gear drop {N}from {B}%s{N}", baseName[clientWhoPickedUpTheAugment], (augmentItemScore * fAugmentRatingMultiplier) * 100.0, augmentStrengthText, menuText, buffedCategory[len], baseName[owner]);
+		Format(text, sizeof(text), "{B}%s {N}stole a {O}%s {B}+{OG}%3.1f{O}PCT {OG}%s {O}%s {B}gear drop {N}from {B}%s{N}", baseName[clientWhoPickedUpTheAugment], augmentStrengthText, (augmentItemScore * fAugmentRatingMultiplier) * 100.0, menuText, buffedCategory[len], baseName[owner]);
 	}
 	ReplaceString(text, sizeof(text), "PCT", "%%", true);
 	for (int i = 1; i <= MaxClients; i++) {

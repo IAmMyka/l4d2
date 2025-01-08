@@ -288,8 +288,13 @@ stock BuildMenu(client, char[] TheMenuName = "none", int numberOfMenusToMoveBack
 			char invLimit[64];
 			int cInventoryLimit = iInventoryLimit;
 			if (bHasDonorPrivileges[client]) cInventoryLimit += iDonorInventoryIncrease;
-			Format(invLimit, sizeof(invLimit), "%d/%d", GetArraySize(myAugmentIDCodes[client]), cInventoryLimit);
+			Format(invLimit, sizeof(invLimit), "%d/%d", GetArraySize(myAugmentIDCodes[client]) - iNumEquippedAugments[client], cInventoryLimit);
 			ReplaceString(text, sizeof(text), "{INVLIMIT}", invLimit);
+		}
+		if (StrContains(text, "{EQUIPPED}", false) != -1) {
+			char maxeq[64];
+			Format(maxeq, sizeof(maxeq), "%d/%d", iNumEquippedAugments[client], iNumAugments);
+			ReplaceString(text, sizeof(text), "{EQUIPPED}", maxeq);
 		}
 		AddMenuItem(menu, text, text);
 	}
@@ -408,8 +413,12 @@ public BuildMenuHandle(Handle menu, MenuAction action, int client, int slot) {
 			else iLootDropsForUnlockedTalentsOnly[client] = 0;
 			BuildMenu(client);
 		}
-		else if (StrEqual(config, "inv_augments", false)) {
+		else if (StrEqual(config, "equipped_augments", false)) {
 			if (GetArraySize(myAugmentIDCodes[client]) > 0) Augments_Inventory(client);
+			else BuildMenu(client);
+		}
+		else if (StrEqual(config, "inv_augments", false)) {
+			if (GetArraySize(myAugmentIDCodes[client]) > 0) Augments_Inventory(client, false);
 			else BuildMenu(client);
 		}
 		else if (StrEqual(config, "level up", false) && PlayerLevel[client] < iMaxLevel) {
