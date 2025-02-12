@@ -171,6 +171,58 @@ public void OnMapStart() {
 
 		SetSurvivorsAliveHostname();
 		CheckGamemode();
+
+		if (CurrentMapPosition == 0 && iResetPlayerLevelOnNewCampaign == 1) {
+			ClearArray(hLoggedPlayers);
+			LogMessage("Clearing Logged players, wiping all player data for this server, a new campaign has begun!");
+			char pct[4];
+			Format(pct, sizeof(pct), "%");
+			char tquery[2048];
+			//SQL_EscapeString(hDatabase, Hostname, tquery, sizeof(tquery));
+			Format(tquery, sizeof(tquery), "UPDATE `%s` SET `exp` = '0', `expov` = '0', `level` = '%d' WHERE (`steam_id` LIKE '%s%s%s');", TheDBPrefix, iPlayerStartingLevel, pct, serverKey, pct);
+			int client = FindAnyClient();
+			SQL_TQuery(hDatabase, QueryResults1, tquery, client);
+
+			if (iDeleteUnequippedGearOnNewCampaign == 1) {
+				for (int i = 1; i <= MaxClients; i++) {
+					if (!IsLegitimateClient(i)) continue;
+					ExperienceLevel[i] = 0;
+					ExperienceOverall[i] = 0;
+					PlayerLevel[i] = iPlayerStartingLevel;
+					for (int ii = 0; ii < GetArraySize(myAugmentInfo[i]); ii++) {
+						int isEquipped = GetArrayCell(myAugmentInfo[i], ii, 3);
+						if (isEquipped >= 0) continue;
+
+						char currentIDCode[64];
+						GetArrayString(myAugmentIDCodes[i], ii, currentIDCode, sizeof(currentIDCode));
+
+						Format(tquery, sizeof(tquery), "DELETE FROM `%s_loot` WHERE `itemid` = '%s';", TheDBPrefix, currentIDCode);
+						SQL_TQuery(hDatabase, QueryResults, tquery, i);
+
+						RemoveFromArray(myAugmentIDCodes[i], ii);
+						RemoveFromArray(myAugmentCategories[i], ii);
+						RemoveFromArray(myAugmentOwners[i], ii);
+						RemoveFromArray(myAugmentInfo[i], ii);
+						RemoveFromArray(myAugmentTargetEffects[i], ii);
+						RemoveFromArray(myAugmentActivatorEffects[i], ii);
+						RemoveFromArray(myAugmentSavedProfiles[i], ii);
+						ii--;
+					}
+				}
+			}
+			if (iDeleteAttributeLevelsOnNewCampaign == 1) {
+				for (int i = 1; i <= MaxClients; i++) {
+					if (!IsLegitimateClient(i)) continue;
+					ClearArray(attributeData[i]);
+					ResizeArray(attributeData[i], 6);
+					for (int ii = ATTRIBUTE_CONSTITUTION; ii <= ATTRIBUTE_LUCK; ii++) {
+						AddAttributeExperience(i, ii, 0, true);
+					}
+				}
+				Format(tquery, sizeof(tquery), "UPDATE `%s` SET `con` = '0', `agi` = '0', `res` = '0', `tec` = '0', `end` = '0', `luc` = '0' WHERE (`steam_id` LIKE '%s%s%s');", TheDBPrefix, pct, serverKey, pct);
+				SQL_TQuery(hDatabase, QueryResults1, tquery, client);
+			}
+		}
 	}
 }
 
@@ -475,6 +527,7 @@ stock LoadMainConfig() {
 	iUseLinearLeveling					= GetConfigValueInt("experience requirements are linear?", 0);
 	iUniqueServerCode					= GetConfigValueInt("unique server code?", 10);
 	iAugmentLevelDivisor				= GetConfigValueInt("augment level divisor?", 1000);
+	fAugmentRatingMultiplierPenalty		= GetConfigValueFloat("augment bonus category penalty?", 1.0);
 	fAugmentRatingMultiplier			= GetConfigValueFloat("augment bonus category rating multiplier?", 0.00001);
 	fAugmentActivatorRatingMultiplier	= GetConfigValueFloat("augment bonus activator rating multiplier?", 0.000005);
 	fAugmentTargetRatingMultiplier		= GetConfigValueFloat("augment bonus target rating multiplier?", 0.000005);
@@ -569,6 +622,12 @@ stock LoadMainConfig() {
 	fRoundSurvivalLootFindBonus			= GetConfigValueFloat("coop round survival loot find bonus?", 0.05);	// 5%
 	fFinaleSurvivalLootFindBonus		= GetConfigValueFloat("finale round survival loot find bonus?", 0.2);	// 20%
 	fDonatorLootBonusIncrease			= GetConfigValueFloat("round survival donator loot find bonus?", 0.3);	// 30%
+	iResetPlayerLevelOnNewCampaign		= GetConfigValueInt("reset player level on new campaign?", 0);
+	iDeleteUnequippedGearOnNewCampaign	= GetConfigValueInt("delete unequipped gear on new campaign?", 0);
+	iDeleteAttributeLevelsOnNewCampaign	= GetConfigValueInt("reset attribute levels on new campaign?", 0);
+	iEnsnareInfectedAlwaysAllowed		= GetConfigValueInt("ensnare infected always allowed?", 1);
+	iShowRealLevelAlways				= GetConfigValueInt("show real level always?", 1);
+	iDisableTankStates					= GetConfigValueInt("disable tank states?", 0);
 	
 	GetConfigValue(TheRequiredGamemode, sizeof(TheRequiredGamemode), "gametype?");
 	GetConfigValue(acmd, sizeof(acmd), "action slot command?");

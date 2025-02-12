@@ -141,17 +141,19 @@ void CheckForRatingLossOnDeath(int client) {
 			}
 		}
 	}
-	else if (iHandicapLevelsAreScoreBased != 1 && handicapLevel[client] > 0) {
+	else if (iHandicapLevelsAreScoreBased != 1) {
 		if (PlayerLevel[client] >= iScoreLostOnDeathLevelRequired && fRatingPercentLostOnDeath > 0.0) {
 			Rating[client] = RoundToCeil(Rating[client] * (1.0 - fRatingPercentLostOnDeath)) + 1;
 			int minRating = RoundToCeil(BestRating[client] * fRatingFloor);
 			if (Rating[client] < minRating) Rating[client] = minRating;
 		}
-		handicapLevel[client]--;
-		handicapLevelAllowed[client] = handicapLevel[client];
-		SetClientHandicapValues(client);
-		FormatPlayerName(client);
-		if (handicapLevel[client] > 0) PrintToChat(client, "\x04Handicap restricted.\n\x03Handicap set to \x05%d", handicapLevel[client]);
-		else PrintToChat(client, "\x04Handicap disabled.");
+		if (handicapLevel[client] > 0) {
+			handicapLevel[client]--;
+			handicapLevelAllowed[client] = handicapLevel[client];
+			SetClientHandicapValues(client);
+			FormatPlayerName(client);
+			if (handicapLevel[client] > 0) PrintToChat(client, "\x04Handicap restricted.\n\x03Handicap set to \x05%d", handicapLevel[client]);
+			else PrintToChat(client, "\x04Handicap disabled.");
+		}
 	}
 }

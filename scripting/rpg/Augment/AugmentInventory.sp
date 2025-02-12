@@ -358,8 +358,8 @@ public Handle Inspect_Augment(client, slot) {
 
 	DrawPanelText(menu, text);
 	ClearArray(EquipAugmentPanel[client]);
-	int thisClientMaxAugmentLevel = (playerCurrentAugmentAverageLevel[client] > 0) ? playerCurrentAugmentAverageLevel[client] + RoundToCeil(playerCurrentAugmentAverageLevel[client] * fAugmentLevelDifferenceForStolen) : 0;
-	if (isEquipped < 0 && isNotOriginalOwner && thisClientMaxAugmentLevel < iThisAugmentLevel) {
+	int thisClientMaxAugmentLevel = (fAugmentLevelDifferenceForStolen > 0.0 && playerCurrentAugmentAverageLevel[client] > 0) ? playerCurrentAugmentAverageLevel[client] + RoundToCeil(playerCurrentAugmentAverageLevel[client] * fAugmentLevelDifferenceForStolen) : 0;
+	if (isEquipped < 0 && isNotOriginalOwner && fAugmentLevelDifferenceForStolen > 0.0 && thisClientMaxAugmentLevel < iThisAugmentLevel) {
 		char maxAllowedLevel[10];
 		AddCommasToString(thisClientMaxAugmentLevel, maxAllowedLevel, 10);
 		Format(text, sizeof(text), "%T", "augment restricted", client, maxAllowedLevel);

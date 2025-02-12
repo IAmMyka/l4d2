@@ -207,7 +207,7 @@ public Call_Event(Handle event, char[] event_name, bool dontBroadcast, pos) {
 				//if (!b_IsHooked[attacker]) {
 				//CreateMyHealthPool(attacker);
 				//}
-				if (attackerZombieClass == ZOMBIECLASS_TANK) {
+				if (attackerZombieClass == ZOMBIECLASS_TANK && iDisableTankStates != 1) {
 					ClearArray(TankState_Array[attacker]);
 					bHasTeleported[attacker] = false;
 					if (iTanksPreset == 1) {
@@ -251,7 +251,7 @@ public Call_Event(Handle event, char[] event_name, bool dontBroadcast, pos) {
 			ExecCheatCommand(FindAnyRandomClient(), "director_force_panic_event");
 		}
 		else {
-			ExecCheatCommand(FindAnyRandomClient(), "z_spawn_old", "tank auto");
+			ExecCheatCommand(FindAnyRandomClient(), "z_spawn", "tank auto");
 			forceTankToSpawnAtTime = GetEngineTime() + fFinaleDelayToForceTankSummon;
 		}
 	}
@@ -393,7 +393,7 @@ public Call_Event(Handle event, char[] event_name, bool dontBroadcast, pos) {
 					if (numTanksToSpawnOnFinale > 4) numTanksToSpawnOnFinale = 4;
 					else if (numTanksToSpawnOnFinale < 1) numTanksToSpawnOnFinale = 1;
 					for (int i = 0; i + iTankCount < numTanksToSpawnOnFinale; i++) {
-						ExecCheatCommand(theClient, "z_spawn_old", "tank auto");
+						ExecCheatCommand(theClient, "z_spawn", "tank auto");
 					}
 				}
 				/*else {
@@ -409,12 +409,13 @@ public Call_Event(Handle event, char[] event_name, bool dontBroadcast, pos) {
 					//if (!IsEnrageActive())
 					ForcePlayerSuicide(attacker);
 					if (iSurvivors >= 1 && (iTankCount < requiredTankCount || !b_IsFinaleActive && iTankCount < iTankLimit)) {
-						ExecCheatCommand(theClient, "z_spawn_old", "tank auto");
+						ExecCheatCommand(theClient, "z_spawn", "tank auto");
 					}
 				}
 			}
 			else if (iEnsnareRestrictions == 1 && attackerZombieClass != ZOMBIECLASS_TANK) {
 				int iEnsnaredCount = EnsnaredInfected();
+				iEnsnaredCount -= iEnsnareInfectedAlwaysAllowed;
 				int livingSurvivors = LivingHumanSurvivors();
 				int ensnareBonus = RaidCommonBoost(_, true);
 				if (ensnareBonus < 0) ensnareBonus = 0;
@@ -455,7 +456,7 @@ public Call_Event(Handle event, char[] event_name, bool dontBroadcast, pos) {
 		}
 	}
 	if (StrEqual(event_name, "ability_use")) {
-		if (attackerTeam == TEAM_INFECTED) {
+		if (iDisableTankStates != 1 && attackerTeam == TEAM_INFECTED) {
 			GetAbilityStrengthByTrigger(attacker, victim, TRIGGER_infected_abilityuse);
 			GetEventString(event, "ability", AbilityUsed, sizeof(AbilityUsed));
 			if (StrContains(AbilityUsed, "ability_throw") != -1) {

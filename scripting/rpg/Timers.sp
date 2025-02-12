@@ -12,7 +12,7 @@ public Action Timer_EntityOnFire(Handle timer) {
 	if (b_IsFinaleActive && forceTankToSpawnAtTime < currentEngineTime) {
 		forceTankToSpawnAtTime = currentEngineTime + fFinaleDelayToForceTankSummon;
 		if (ActiveTanks() < DirectorTankLimit()) {
-			ExecCheatCommand(FindAnyRandomClient(), "z_spawn_old", "tank auto");
+			ExecCheatCommand(FindAnyRandomClient(), "z_spawn", "tank auto");
 		}
 	}
 	for (int i = 0; i < GetArraySize(EntityOnFire); i++) {

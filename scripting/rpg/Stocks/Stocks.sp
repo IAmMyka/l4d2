@@ -1110,7 +1110,7 @@ stock SpawnAnyInfected(client) {
 		else Format(InfectedName, sizeof(InfectedName), "charger");
 		Format(InfectedName, sizeof(InfectedName), "%s auto", InfectedName);
 
-		ExecCheatCommand(client, "z_spawn_old", InfectedName);
+		ExecCheatCommand(client, "z_spawn", InfectedName);
 	}
 }
 
@@ -1520,6 +1520,7 @@ stock TalentRequirementsMet(client, Handle Keys, Handle Values, char[] sTalentLi
 		if (!StrEqual(sTalentList, "none")) {
 			if (pos < 0) {
 				Format(sTalentList, TheSize, "%s", text);
+				LogMessage(text);
 				break;
 			}
 
@@ -1527,8 +1528,8 @@ stock TalentRequirementsMet(client, Handle Keys, Handle Values, char[] sTalentLi
 				count++;
 				GetTranslationOfTalentName(client, TalentName, talentTranslation, sizeof(talentTranslation), true);
 				Format(talentTranslation, sizeof(talentTranslation), "%T", talentTranslation, client);
-				if (count > 1) Format(text, sizeof(text), "%s\n%s", text, talentTranslation);
-				else Format(text, sizeof(text), "%s", talentTranslation);
+				if (count > 1) Format(text, sizeof(text), "%s \n %s", text, talentTranslation);
+				else Format(text, sizeof(text), " %s", talentTranslation);
 			}
 			else requiredTalentsToUnlock--;
 		}

@@ -230,11 +230,6 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 						SetArrayCell(WitchList, pos, victim, WITCH_LAST_ATTACKED_USER);
 						SetArrayCell(WitchList, pos, 0, WITCH_CONSECUTIVE_HITS);
 					}
-					if (LastAttackedUser[attacker] == victim) ConsecutiveHits[attacker]++;
-					else {
-						LastAttackedUser[attacker] = victim;
-						ConsecutiveHits[attacker] = 0;
-					}
 					char stringRef[64];
 					int i_WitchDamage = GetCharacterSheetData(victim, stringRef, 64, 4, _, attacker);
 					int i_WitchDamageIncreaseFromBuffer = getDamageIncreaseFromBuffer(attacker, i_WitchDamage);
@@ -286,12 +281,12 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 						if (iRPGMode >= 1) {
 							float fAcidDamage = (attackerType == 1) ? fAcidDamageSupersPlayerLevel : fAcidDamagePlayerLevel;
 							if (iBotLevelType == 1) {
-								if (effectType == 1) survivorIncomingDamage += RoundToFloor(survivorIncomingDamage * (SurvivorLevels() * fAcidDamage));
-								else survivorIncomingDamage += RoundToFloor(survivorIncomingDamage * (SurvivorLevels() * fBurnPercentage));
+								if (effectType == 1) survivorIncomingDamage = RoundToFloor(survivorIncomingDamage * (SurvivorLevels() * fAcidDamage));
+								else survivorIncomingDamage = RoundToFloor(survivorIncomingDamage * (SurvivorLevels() * fBurnPercentage));
 							}
 							else {
-								if (effectType == 1) survivorIncomingDamage += RoundToFloor(survivorIncomingDamage * (GetDifficultyRating(victim) * fAcidDamage));
-								else survivorIncomingDamage += RoundToFloor(survivorIncomingDamage * (GetDifficultyRating(victim) * fBurnPercentage));
+								if (effectType == 1) survivorIncomingDamage = RoundToFloor(survivorIncomingDamage * (GetDifficultyRating(victim) * fAcidDamage));
+								else survivorIncomingDamage = RoundToFloor(survivorIncomingDamage * (GetDifficultyRating(victim) * fBurnPercentage));
 							}
 						}
 						//PrintToChatAll("DoT Damage: %d %d", survivorIncomingDamage, survivorIncomingDamage * (iBurnCounter + 1));

@@ -48,7 +48,8 @@ stock void BuildMenuTitle(int client, Handle menu, int bot = 0, int type = 0, bo
 							strengthOfCurrentLayer = 0;
 							WipeTalentPoints(client);
 						}
-						Format(text, sizeof(text), "%T", "RPG Layer Eligible", client, text, PlayerCurrentMenuLayer[client], strengthOfCurrentLayer, upgradesRequiredThisLayer, UpgradesAvailable[client] + FreeUpgrades[client]);
+						if (iMaxLayers > 1) Format(text, sizeof(text), "%T", "RPG Layer Eligible", client, text, PlayerCurrentMenuLayer[client], strengthOfCurrentLayer, upgradesRequiredThisLayer, UpgradesAvailable[client] + FreeUpgrades[client]);
+						else Format(text, sizeof(text), "%T", "RPG Layer Eligible Simple", client, text, UpgradesAvailable[client] + FreeUpgrades[client]);
 					}
 					else Format(text, sizeof(text), "%T", "RPG Layer Not Eligible", client, text, PlayerCurrentMenuLayer[client]);
 				}

@@ -47,7 +47,7 @@ stock CheckExperienceRequirement(client, bool bot = false, iLevel = 0, previousL
 
 stock GetPlayerLevel(client) {
 	int iExperienceOverall = ExperienceOverall[client];
-	int iLevel = 1;
+	int iLevel = 0;
 	int ExperienceRequirement = CheckExperienceRequirement(client, false, iLevel);
 	while (iExperienceOverall >= ExperienceRequirement && iLevel < iMaxLevel) {
 		if (iIsLevelingPaused[client] == 1 && iExperienceOverall == ExperienceRequirement) break;

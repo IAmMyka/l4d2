@@ -210,6 +210,7 @@ stock void PickupAugment(int client, int owner, char[] ownerSteamID = "none", ch
 	SetArrayString(myAugmentCategories[client], size, buffedCategory);
 
 	int augmentItemScore = GetArrayCell(playerLootOnGround[owner], pos);
+	augmentItemScore = RoundToCeil(augmentItemScore * fAugmentRatingMultiplierPenalty);
 	char key[64];
 	GetClientAuthId(client, AuthId_Steam2, key, sizeof(key));
 	SetArrayString(myAugmentOwners[client], size, ownerSteamID);

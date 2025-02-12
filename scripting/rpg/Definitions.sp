@@ -15,7 +15,7 @@
 #define MAX_CHAT_LENGTH					1024
 #define COOPRECORD_DB					"db_season_coop"
 #define SURVRECORD_DB					"db_season_surv"
-#define PLUGIN_VERSION					"v4.8.4"
+#define PLUGIN_VERSION					"v4.9.1"
 #define PROFILE_VERSION					"v1.5"
 #define PLUGIN_CONTACT					"skyy"
 #define PLUGIN_NAME						"skyrpg"
@@ -542,6 +542,14 @@
 #define WITCH_LAST_ATTACKED_USER 2
 #define WITCH_CONSECUTIVE_HITS 3
 
+int iDisableTankStates;
+int iShowRealLevelAlways;
+Handle hLoggedPlayers;
+int iEnsnareInfectedAlwaysAllowed;
+float fAugmentRatingMultiplierPenalty;
+int iDeleteAttributeLevelsOnNewCampaign;
+int iDeleteUnequippedGearOnNewCampaign;
+int iResetPlayerLevelOnNewCampaign;
 int iNumEquippedAugments[MAXPLAYERS + 1];
 float fDonatorLootBonusIncrease;
 float fRoundSurvivalLootFindBonus;
@@ -1616,6 +1624,7 @@ stock CreateAllArrays() {
 	if (damageOfSpecialInfected == INVALID_HANDLE) damageOfSpecialInfected = CreateArray(4);
 	if (damageOfWitch == INVALID_HANDLE) damageOfWitch = CreateArray(4);
 	if (damageOfCommonInfected == INVALID_HANDLE) damageOfCommonInfected = CreateArray(4);
+	if (hLoggedPlayers == INVALID_HANDLE) hLoggedPlayers = CreateArray(16);
 	
 	ResizeArray(tempStorage, MAXPLAYERS + 1);
 	for (int i = 1; i <= MAXPLAYERS; i++) {

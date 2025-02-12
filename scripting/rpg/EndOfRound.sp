@@ -1,5 +1,7 @@
 stock CallRoundIsOver() {
 	if (!b_IsRoundIsOver) {
+		char pct[4];
+		Format(pct, sizeof(pct), "%");
 		b_IsRoundIsOver					= true;
 		if (b_IsActiveRound) b_IsActiveRound = false;
 		int pEnt = -1;
@@ -87,6 +89,54 @@ stock CallRoundIsOver() {
 				if (!IsLegitimateClient(i)) continue;
 				Client_PrintToChat(i, true, campaignStatistics);
 			}
+
+			if (CurrentMapPosition == 1 && iResetPlayerLevelOnNewCampaign == 1) {
+				char tquery[2048];
+				//SQL_EscapeString(hDatabase, Hostname, tquery, sizeof(tquery));
+				Format(tquery, sizeof(tquery), "UPDATE `%s` SET `exp` = '0', `expov` = '0', `level` = '%d' WHERE (`steam_id` LIKE '%s%s%s');", TheDBPrefix, iPlayerStartingLevel, pct, serverKey, pct);
+				int client = FindAnyClient();
+				SQL_TQuery(hDatabase, QueryResults1, tquery, client);
+
+				if (iDeleteUnequippedGearOnNewCampaign == 1) {
+					for (int i = 1; i <= MaxClients; i++) {
+						if (!IsLegitimateClient(i)) continue;
+						ExperienceLevel[i] = 0;
+						ExperienceOverall[i] = 0;
+						PlayerLevel[i] = iPlayerStartingLevel;
+						for (int ii = 0; ii < GetArraySize(myAugmentInfo[i]); ii++) {
+							int isEquipped = GetArrayCell(myAugmentInfo[i], ii, 3);
+							if (isEquipped >= 0) continue;
+
+							char currentIDCode[64];
+							GetArrayString(myAugmentIDCodes[i], ii, currentIDCode, sizeof(currentIDCode));
+
+							Format(tquery, sizeof(tquery), "DELETE FROM `%s_loot` WHERE `itemid` = '%s';", TheDBPrefix, currentIDCode);
+							SQL_TQuery(hDatabase, QueryResults, tquery, i);
+
+							RemoveFromArray(myAugmentIDCodes[i], ii);
+							RemoveFromArray(myAugmentCategories[i], ii);
+							RemoveFromArray(myAugmentOwners[i], ii);
+							RemoveFromArray(myAugmentInfo[i], ii);
+							RemoveFromArray(myAugmentTargetEffects[i], ii);
+							RemoveFromArray(myAugmentActivatorEffects[i], ii);
+							RemoveFromArray(myAugmentSavedProfiles[i], ii);
+							ii--;
+						}
+					}
+				}
+				if (iDeleteAttributeLevelsOnNewCampaign == 1) {
+					for (int i = 1; i <= MaxClients; i++) {
+						if (!IsLegitimateClient(i)) continue;
+						ClearArray(attributeData[i]);
+						ResizeArray(attributeData[i], 6);
+						for (int ii = ATTRIBUTE_CONSTITUTION; ii <= ATTRIBUTE_LUCK; ii++) {
+							AddAttributeExperience(i, ii, 0, true);
+						}
+					}
+					Format(tquery, sizeof(tquery), "UPDATE `%s` SET `con` = '0', `agi` = '0', `res` = '0', `tec` = '0', `end` = '0', `luc` = '0' WHERE (`steam_id` LIKE '%s%s%s');", TheDBPrefix, pct, serverKey, pct);
+					SQL_TQuery(hDatabase, QueryResults1, tquery, client);
+				}
+			}
 		}
 		ClearArray(damageOfSpecialInfected);
 		ClearArray(damageOfWitch);
@@ -97,21 +147,15 @@ stock CallRoundIsOver() {
 			if (!IsSurvivalMode) {
 				int livingSurvs = LivingSurvivors();
 				float fExperienceBonus = 0.0;
-				float fLootBonus = 0.0;
 				if (livingSurvs > 1) {
 					fExperienceBonus = fCoopSurvBon * (livingSurvs-1);
-					fLootBonus = fRoundSurvivalLootFindBonus * (livingSurvs-1);
 				}
 				else if (TotalHumanSurvivors() == 1) {
 					fExperienceBonus = fCoopSoloSurvBon;
-					fLootBonus = fRoundSurvivalLootFindBonus;
 				}
-				char pct[4];
-				Format(pct, sizeof(pct), "%");
 				//RoundExperienceMultiplier[i] += FinSurvBon;
 				if (b_IsRescueVehicleArrived) {
 					fExperienceBonus += FinSurvBon;
-					fLootBonus = fFinaleSurvivalLootFindBonus;
 				}
 
 				for (int i = 1; i <= MaxClients; i++) {
@@ -120,6 +164,12 @@ stock CallRoundIsOver() {
 						iThreatLevel[i] = 0;
 						bIsInCombat[i] = false;
 						fSlowSpeed[i] = 1.0;
+						if (CurrentMapPosition == 1 && iResetPlayerLevelOnNewCampaign == 1) {
+							if (!IsFakeClient(i)) PlayerLevel[i] = iPlayerStartingLevel;
+							else PlayerLevel[i] = iBotPlayerStartingLevel;
+							ExperienceLevel[i] = 0;
+							ExperienceOverall[i] = 0;
+						}
 						if (myCurrentTeam[i] != TEAM_SURVIVOR || !IsPlayerAlive(i)) continue;
 						if (handicapLevel[i] < 0) {
 							handicapLevel[i] = 0;
@@ -133,10 +183,14 @@ stock CallRoundIsOver() {
 						if (RoundExperienceMultiplier[i] < 0.0) RoundExperienceMultiplier[i] = 0.0;
 						if (fExperienceBonus > 0.0) {
 							float scoreMult = GetScoreMultiplier(i);
-							float lootMult = scoreMult;
+							float lootMult = 0.0;
+							if (b_IsRescueVehicleArrived) {
+								fExperienceBonus += FinSurvBon;
+								lootMult = (scoreMult * fFinaleSurvivalLootFindBonus);
+							}
+							else lootMult = (scoreMult * fRoundSurvivalLootFindBonus);
 							if (scoreMult > 0.0) {
 								scoreMult *= fExperienceBonus;
-								lootMult *= fLootBonus;
 								RoundExperienceMultiplier[i] += scoreMult;
 								clientLootFindBonus[i] += lootMult;
 								PrintToChat(i, "%T", "living survivors experience bonus", i, orange, blue, orange, white, blue, scoreMult * 100.0, white, pct, orange);
@@ -154,7 +208,7 @@ stock CallRoundIsOver() {
 							}
 						}
 						//else PrintToChat(i, "no round bonus applied.");
-						AwardExperience(i, _, _, true);
+						if (CurrentMapPosition != 1 || iResetPlayerLevelOnNewCampaign != 1) AwardExperience(i, _, _, true);
 					}
 				}
 			}

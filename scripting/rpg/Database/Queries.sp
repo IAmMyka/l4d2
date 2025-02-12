@@ -1141,8 +1141,24 @@ public void QueryResults_Load(Handle owner, Handle hndl, const char[] error, any
 			if (handicapLevel[client] > handicapLevelAllowed[client]) {
 				handicapLevel[client] = 0;
 			}
-		}
-		if (PlayerLevel[client] > 0) {
+			if (iResetPlayerLevelOnNewCampaign == 1 && CurrentMapPosition == 0) {
+				if (FindStringInArray(hLoggedPlayers, key) == -1) {
+					LogMessage("%N has loaded for the first time this campaign, resetting their data.", client);
+					// user has not been logged this campaign.
+					ExperienceLevel[client] = 0;
+					ExperienceOverall[client] = 0;
+					PlayerUpgradesTotal[client] = 0;
+					FreeUpgrades[client] = iPlayerStartingLevel;
+					UpgradesAvailable[client] = 0;
+					PlayerLevel[client] = iPlayerStartingLevel;
+					PlayerLevelUpgrades[client] = 0;
+					TotalTalentPoints[client] = 0;
+					PushArrayString(hLoggedPlayers, key);
+				}
+				else LogMessage("%N data has already reset.", client);
+			}
+ 		}
+		if (PlayerLevel[client] >= 0) {
 			if (Rating[client] < 0) Rating[client] = 0;
 			if (!CheckServerLevelRequirements(client)) {
 				b_IsLoading[client] = false;
@@ -1457,7 +1473,7 @@ stock void ClearLocalClientData(client) {
 	playerCurrentAugmentAverageLevel[client] = 0;
 	ExperienceLevel[client]		=	0;
 	ExperienceOverall[client]	=	0;
-	PlayerLevelUpgrades[client]	=	1;
+	PlayerLevelUpgrades[client]	=	0;
 	PlayerLevel[client]			=	iPlayerStartingLevel;
 	SkyLevel[client]			=	0;
 	SkyPoints[client]			=	0;
@@ -1474,7 +1490,7 @@ stock void ClearLocalClientData(client) {
 	clientLootFindBonus[client] = 0.0;
 	PreviousRoundIncaps[client]	=	0;
 	ExperienceDebt[client]		=	0;
-	UpgradesAvailable[client]	=	1;
+	UpgradesAvailable[client]	=	0;
 	UpgradesAwarded[client]		=	0;
 	BestRating[client] =	0;
 	Rating[client] = 0;
@@ -1885,7 +1901,7 @@ public void QueryResults_LoadActionBar(Handle owner, Handle hndl, const char[] e
 
 stock FormatPlayerName(int client, bool setBaseName = false) {
 	char playerNameFormatted[512];
-	int TotalPoints = TotalPointsAssigned(client);
+	int TotalPoints = (iShowRealLevelAlways == 1) ? PlayerLevel[client] : TotalPointsAssigned(client);
 	if (!IsFakeClient(client)) {
 		if (setBaseName) GetClientName(client, baseName[client], sizeof(baseName[]));
 		if (handicapLevel[client] < 1) Format(playerNameFormatted, 512, "Level %d %s", TotalPoints, baseName[client]);
